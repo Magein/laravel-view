@@ -1,0 +1,31 @@
+{
+  "name": "magein/laravel-view",
+  "description": "laravel构建快速表单类",
+  "keywords": [
+    "laravel",
+    "tools"
+  ],
+  "homepage": "https://github.com/magein/laravel-view",
+  "authors": [
+    {
+      "name": "magein",
+      "homepage": "https://github.com/magein"
+    }
+  ],
+  "license": "MIT",
+  "require": {
+    "php": "^7.4|^8.0",
+    "ext-json": "*",
+    "laravel/framework": "~8.54",
+    "magein/tools": "dev-master",
+    "magein/laravel-common": "*@dev"
+  },
+  "autoload": {
+    "psr-4": {
+      "Magein\\Admin\\": "src/"
+    }
+  },
+  "autoload-dev": {},
+  "suggest": {},
+  "extra": {}
+}
