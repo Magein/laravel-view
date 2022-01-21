@@ -2,6 +2,7 @@
 
 namespace Magein\Admin\Commands;
 
+use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use magein\tools\common\Variable;
@@ -13,14 +14,14 @@ class MakeApiViewPage extends Command
      *
      * @var string
      */
-    protected $signature = 'map {name} {--m=} {--f}';
+    protected $signature = 'map {name} {--M|model=} {--F|fillable} {--T|table}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = '创建view page安全参数';
+    protected $description = '创建view page安全参数 -T、--table 查询的表 -M、--model 可以指定使用的模型 ，-F、--fillable 只显示模型的fillable值';
 
     /**
      * Create a new command instance.
@@ -40,19 +41,40 @@ class MakeApiViewPage extends Command
     public function handle()
     {
         $name = $this->argument('name');
-        $model = $this->option('m');
-        $fillable = $this->option('f');
+        $model = $this->option('model');
+        $table = $this->option('table');
+        $fillable = $this->option('fillable');
 
-        if (preg_match('/y$/', $name)) {
-            $name = preg_replace('/y$/', 'ies', $name);
-        } elseif (!preg_match('/s$/', $name)) {
-            $name .= 's';
+        if (empty($model)) {
+            $model = $name;
         }
 
-        $fields = DB::select('show full columns from ' . \magein\tools\common\Variable::instance()->underline($name));
+        $model = Variable::instance()->pascal($model);
 
+        if (preg_match('/y$/', $name)) {
+            $table = preg_replace('/y$/', 'ies', $name);
+        } elseif (!preg_match('/s$/', $name)) {
+            $table = $name . 's';
+        } else {
+            $table = $name;
+        }
+
+        var_dump(123);
+        die();
+
+        $page_path = config('view.page_path');
+        $page_name = Variable::instance()->pascal($name) . 'Page.php';
+        $filename = $page_path . '/' . $page_name;
+
+        if (is_file($filename) && !$fillable) {
+            $this->info('error:file exist');
+            $this->info('maybe you want get fillable fields, please input -F');
+            exit();
+        }
+
+        $fields = DB::select('show full columns from ' . $table);
         if (empty($fields)) {
-            $this->info('table name not found ! please check you table name');
+            $this->info('error: table name not found ! please check you table name');
             exit();
         }
 
@@ -138,59 +160,42 @@ class MakeApiViewPage extends Command
         $validate_message .= "          ]";
         $fill .= "        ];";
 
-        if (empty($model)) {
-            $model = preg_replace('/s$/', '', $name);
-        }
 
         if ($fillable) {
             echo $fill;
             exit();
         }
 
-        $model = Variable::instance()->pascal($model);
+        var_dump(__DIR__);
+        die();
 
-        $filepath = $model . 'Page';
-        $filename = './app/Admin/Page/' . $model . 'Page.php';
+//        $template = file_get_contents(__DIR__ . '/../ViewPageTemplate.php');
+//
+//        echo $template;
+//        die();
 
-        if (is_file($filename)) {
-            $this->info('fail:file exist');
-            $this->info('maybe you want get fillable fields, please input --f param');
-            exit();
-        }
 
         $page = <<<EOF
 <?php
 
-namespace App\Admin\View\Page;
+namespace $page_path;
 
-use App\Admin\View\Page;
+use Magein\Admin\View\Page;
 use App\Models\\$model;
 
-class {$filepath} extends Page
+class {$page_name} extends Page
 {
+
+    public \$model = $model::class;
     /**
-     * @return $model
+     * @return array
      */
-    public function model(): $model
-    {
-        return new $model();
-    }
+    public \$rules = {$validate_rules};
 
     /**
      * @return array
      */
-    public function rules(): array
-    {
-        return $validate_rules;
-    }
-
-    /**
-     * @return array
-     */
-    public function message(): array
-    {
-        return $validate_message;
-    }
+    public \$message = {$validate_message};
 }
 
 
