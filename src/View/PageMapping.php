@@ -8,8 +8,6 @@ use magein\tools\common\Variable;
 
 class PageMapping
 {
-    protected $path = 'App\Admin\View\Page';
-
     /**
      * 获取page页面
      * @param $name
@@ -18,17 +16,16 @@ class PageMapping
     public function page($name)
     {
         $name = Variable::instance()->pascal($name);
-
         $mapping = $this->mapping($name);
         if (is_string($mapping)) {
             return new Page($mapping);
         }
-
         if ($mapping instanceof Page) {
             return $mapping;
         }
+        $path = config('view.page_path');
+        $namespace = $path . '\\' . $name . 'Page';
 
-        $namespace = $this->path . '\\' . $name . 'Page';
         try {
             if (class_exists($namespace)) {
                 return new $namespace();

@@ -10,3 +10,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::any('view/{name}/{action}', [System::class, 'view']);
     Route::post('view/upload', [System::class, 'upload']);
 });
+
+Route::get('vue', function () {
+    echo (new \Magein\Admin\View\PageMake())->vue();
+});

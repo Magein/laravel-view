@@ -3,11 +3,11 @@
 namespace namespaceTemplate;
 
 use Magein\Admin\View\Page;
-use useModel;
+use App\Models\useModel;
 
 class pageName extends Page
 {
-    public $model = useModel::class;
+    public $model = Model::class;
 
     public $auth = [];
 

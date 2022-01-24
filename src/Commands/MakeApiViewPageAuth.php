@@ -3,10 +3,13 @@
 namespace Magein\Admin\Commands;
 
 use Illuminate\Console\Command;
+use Magein\Admin\Models\SystemAuth;
+use Magein\Admin\Models\SystemUserSetting;
+use Magein\Admin\Models\User;
 use Magein\Admin\View\PageAuth;
 use magein\tools\common\Variable;
 
-class MakeRequestApiAuth extends Command
+class MakeApiViewPageAuth extends Command
 {
     /**
      * The name and signature of the console command.
@@ -94,13 +97,16 @@ class MakeRequestApiAuth extends Command
 
     private function page()
     {
-        $files = glob(app_path() . '/Admin/View/Page/*Page.php');
-
+        $page_path = config('view.page_path');
+        $real_path = preg_replace('/App/', '', $page_path);
+        $path = app_path() . $real_path;
+        $files = glob($path . '/*');
         if ($files) {
             foreach ($files as $file) {
                 $filename = pathinfo($file, PATHINFO_FILENAME);
                 $path = preg_replace('/Page/', '', $filename);
-                $namespace = 'App\Admin\View\Page\\' . $filename;
+                $namespace = $page_path . '\\' . $filename;
+
                 if (class_exists($namespace)) {
                     $pageClass = new $namespace();
                     if (method_exists($pageClass, 'auth')) {

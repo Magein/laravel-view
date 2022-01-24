@@ -2,9 +2,9 @@
 
 namespace Magein\Admin;
 
-use Illuminate\Foundation\Testing\Concerns\MakesHttpRequests;
 use Illuminate\Support\ServiceProvider;
 use Magein\Admin\Commands\MakeApiViewPage;
+use Magein\Admin\Commands\MakeApiViewPageAuth;
 
 class ViewServiceProvider extends ServiceProvider
 {
@@ -40,7 +40,7 @@ class ViewServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 MakeApiViewPage::class,
-//                MakesHttpRequests::class
+                MakeApiViewPageAuth::class
             ]);
         }
     }

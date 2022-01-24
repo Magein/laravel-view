@@ -39,9 +39,16 @@ class ViewData
         $this->action = $action;
     }
 
-    public function response(PageMapping $mapping = null)
+    public function response()
     {
-        if (empty($mapping)) {
+        $mapping = config('view.page_mapping');
+        try {
+            $mapping = new $mapping();
+        } catch (Exception $exception) {
+            $mapping = new PageMapping();
+        }
+
+        if (!$mapping instanceof PageMapping) {
             $mapping = new PageMapping();
         }
 

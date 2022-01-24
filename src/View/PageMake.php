@@ -17,6 +17,7 @@ class PageMake
         if (empty($table)) {
             dd('请输入表名称');
         }
+
         if (empty($name)) {
             $name = Variable::instance()->camelCase($table);
             if (preg_match('/s$/', $name)) {
@@ -116,7 +117,7 @@ class PageMake
                 }
 
                 if ($key > 0) {
-                    $const_string .= '            ';
+                    $const_string .= '          ';
                 }
                 $const_string .= 'const ' . $item['field'] . ' = ';
                 $const_string .= '{';
@@ -159,16 +160,16 @@ export default {
     },
     setup() {
         const dictionaries=$dictionary;
-
         $const_string
         let page = new Page();
         page.name="$name";
-        page.region=$region;
-        page.search= [$search];
-        page.action= ['edit', 'remove'];
         page.dictionay = dictionaries;
+        page.search= [$search];
         page.form = [$form];
-        page.header= [$header];
+
+        page.table= [$header];
+        page.table.action= ['edit', 'remove'];
+        page.table.region=$region;
 
         const report = params => {
           let callback = params?.callback;

@@ -2,7 +2,6 @@
 
 namespace Magein\Admin\Commands;
 
-use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use magein\tools\common\Variable;
@@ -12,9 +11,13 @@ class MakeApiViewPage extends Command
     /**
      * The name and signature of the console command.
      *
+     * --M|model 指定模型名称
+     * --T|table 指定表名称
+     * --F|fillable 只获取模型的$fillable值
+     * --ig 忽略模型的二级目录
      * @var string
      */
-    protected $signature = 'map {name} {--M|model=} {--F|fillable} {--T|table}';
+    protected $signature = 'map {name} {--M|model=} {--T|table=} {--F|fillable=} {--ig}';
 
     /**
      * The console command description.
@@ -44,23 +47,27 @@ class MakeApiViewPage extends Command
         $model = $this->option('model');
         $table = $this->option('table');
         $fillable = $this->option('fillable');
+        $ig = $this->option('ig');
 
         if (empty($model)) {
             $model = $name;
         }
-
         $model = Variable::instance()->pascal($model);
-
-        if (preg_match('/y$/', $name)) {
-            $table = preg_replace('/y$/', 'ies', $name);
-        } elseif (!preg_match('/s$/', $name)) {
-            $table = $name . 's';
-        } else {
-            $table = $name;
+        $use_model = $model;
+        if (preg_match('/_/', $name) && !$ig) {
+            $models = explode('_', $name);
+            $use_model = Variable::instance()->pascal($models[0]) . '\\' . $model;
         }
 
-        var_dump(123);
-        die();
+        if (empty($table)) {
+            if (preg_match('/y$/', $name)) {
+                $table = preg_replace('/y$/', 'ies', $name);
+            } elseif (!preg_match('/s$/', $name)) {
+                $table = $name . 's';
+            } else {
+                $table = $name;
+            }
+        }
 
         $page_path = config('view.page_path');
         $page_name = Variable::instance()->pascal($name) . 'Page.php';
@@ -160,48 +167,31 @@ class MakeApiViewPage extends Command
         $validate_message .= "          ]";
         $fill .= "        ];";
 
-
         if ($fillable) {
             echo $fill;
             exit();
         }
 
-        var_dump(__DIR__);
-        die();
+        $template = file_get_contents(__DIR__ . '/../ViewPageTemplate.php');
 
-//        $template = file_get_contents(__DIR__ . '/../ViewPageTemplate.php');
-//
-//        echo $template;
-//        die();
+        $search = [
+            '/namespaceTemplate/',
+            '/useModel/',
+            '/Model::class/',
+            '/pageName/',
+        ];
 
+        $replace = [
+            $page_path,
+            $use_model,
+            "$model::class",
+            pathinfo($page_name, PATHINFO_FILENAME)
+        ];
 
-        $page = <<<EOF
-<?php
+        $content = preg_replace($search, $replace, $template);
 
-namespace $page_path;
+        file_put_contents($filename, $content);
 
-use Magein\Admin\View\Page;
-use App\Models\\$model;
-
-class {$page_name} extends Page
-{
-
-    public \$model = $model::class;
-    /**
-     * @return array
-     */
-    public \$rules = {$validate_rules};
-
-    /**
-     * @return array
-     */
-    public \$message = {$validate_message};
-}
-
-
-EOF;
-
-        file_put_contents($filename, $page);
-
+        $this->info('success');
     }
 }
