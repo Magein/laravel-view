@@ -4,6 +4,8 @@ namespace Magein\Admin\View;
 
 use Magein\Admin\Models\SystemUserAction;
 use Magein\Admin\Models\SystemUserSetting;
+use Magein\Admin\View\Page\SystemAuthPage;
+use Magein\Admin\View\Page\SystemRolePage;
 use magein\tools\common\Variable;
 
 class PageMapping
@@ -44,6 +46,8 @@ class PageMapping
     protected function mapping($name)
     {
         $data = [
+            'SystemRole' => new SystemRolePage(),
+            'SystemAuth' => new SystemAuthPage(),
             'SystemUserAction' => SystemUserAction::class,
             'SystemUserSetting' => SystemUserSetting::class,
         ];
