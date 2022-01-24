@@ -6,17 +6,21 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Magein\Admin\Models\User;
 use Magein\Common\BaseService;
 use Magein\Common\MsgContainer;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class UserService extends BaseService
 {
+    public static function id()
+    {
+        return request()->user()->id ?? null;
+    }
+
     /**
      * @return Authenticatable|null
      */
     public function getInfo()
     {
-        $user = Auth::user();
+        $user = request()->user();
         if ($user) {
             $user['setting'] = SystemService::instance()->getUserSetting($user->id ?? '');
         }
@@ -25,10 +29,10 @@ class UserService extends BaseService
 
     public function setUserInfo($data)
     {
-        if (!Auth::id()) {
+        if (!self::id()) {
             return MsgContainer::msg('请先登录', 403);
         }
-        $user = User::find(Auth::id());
+        $user = User::find(self::id());
         $user->fill($data);
         return $user->save();
     }
@@ -51,7 +55,7 @@ class UserService extends BaseService
             return MsgContainer::msg('请输入新密码和确认密码不一致');
         }
 
-        $user = User::find(Auth::id());
+        $user = User::find(self::id());
         if (!Hash::check($password, $user->password)) {
             return MsgContainer::msg('旧密码不正确');
         }

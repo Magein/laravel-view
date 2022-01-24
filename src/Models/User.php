@@ -3,6 +3,7 @@
 namespace Magein\Admin\Models;
 
 use Illuminate\Support\Facades\Hash;
+use Laravel\Sanctum\HasApiTokens;
 use Magein\Common\AssetPath;
 use Magein\Common\BaseModel;
 
@@ -24,6 +25,8 @@ use Magein\Common\BaseModel;
  */
 class User extends BaseModel
 {
+    use HasApiTokens;
+
     /**
      * The attributes that are mass assignable.
      *

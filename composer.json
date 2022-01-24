@@ -17,6 +17,7 @@
     "php": "^7.4|^8.0",
     "ext-json": "*",
     "laravel/framework": "~8.54",
+    "laravel/sanctum": "^2.14",
     "magein/tools": "dev-master",
     "magein/laravel-common": "*@dev"
   },

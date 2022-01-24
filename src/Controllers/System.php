@@ -13,6 +13,10 @@ use Magein\Common\Upload\Driver\UploadLocal;
 
 class System extends BaseController
 {
+    /**
+     * @param Request $request
+     * @return ResponseFactory|Response
+     */
     public function view(Request $request)
     {
         $params = $request::route()->parameters;
@@ -20,10 +24,14 @@ class System extends BaseController
         return $viewData->response();
     }
 
+    /**
+     * @param \Illuminate\Http\Request $request
+     * @return ResponseFactory|Response
+     */
     public function upload(\Illuminate\Http\Request $request)
     {
         $upload = new UploadLocal($request->file('file'));
-        $upload->move();
+        return ApiResponse::auto($upload->move());
     }
 
     /**
