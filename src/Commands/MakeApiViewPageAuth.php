@@ -3,7 +3,10 @@
 namespace Magein\Admin\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Date;
+use Illuminate\Support\Str;
 use Magein\Admin\Models\SystemAuth;
+use Magein\Admin\Models\SystemRole;
 use Magein\Admin\Models\SystemUserSetting;
 use Magein\Admin\Models\User;
 use Magein\Admin\View\PageAuth;
@@ -14,24 +17,29 @@ class MakeApiViewPageAuth extends Command
     /**
      * The name and signature of the console command.
      *                          分组          路径             名称     描述
-     * php artisan request:auth system_role  role/post  新增角色  管理员新增角色
-     * php artisan request:auth --group=role --p=admin/role/add --n=新增角色 --d=管理员新增角色
-     * php artisan request:auth -G role -P admin/role/add -N 新增角色 -D 管理员新增角色
-     * php artisan request:auth -G role -P admin/role/add
+     * php artisan view:auth system_role  role/post  新增角色  管理员新增角色
+     * php artisan view:auth --group=role --p=admin/role/add --n=新增角色 --d=管理员新增角色
+     * php artisan view:auth -G role -P admin/role/add -N 新增角色 -D 管理员新增角色
+     * php artisan view:auth -G role -P admin/role/add
+     *
      * 下面命令将创建Admin\View\Page\SystemRolePage的restful权限 包含：post、put、patch、get、list、trash、clean、recovery
-     * php artisan request:auth system_role 角色
+     * php artisan view:auth system_role 角色
+     *
      * 下面命令将创建Admin\View\Page\**Page.php的resetful权限，会根据**Page.php类中的auth方法生成
-     * php artisan request:auth --all=page
-     * php artisan request:auth -A page
+     * php artisan view:auth --page=page
+     *
      * 下面命将创建Admin\Controller\**.php中方法的权限,文件中需要包含@requestAuth
-     * php artisan request:auth --all=controller
-     * php artisan request:auth -A controller
+     * php artisan view:auth --page=controller
+     *
+     * 创建用户、用户组
+     * php artisan view:auth --user
+     *
      * 初始化的时候，需要创建超级管理员的所有权限
-     * php artisan request:auth --all=supper
-     * php artisan request:auth -A s
+     * php artisan view:auth --user=supper
+     *
      * @var string
      */
-    protected $signature = 'request:auth {info?*}  {--G|group=} {--N|name=} {--P|path=} {--D|description=} {--A|all=} ';
+    protected $signature = 'view:vue {info?*}  {--G|group=} {--N|name=} {--P|path=} {--D|description=} {--page=} {--user=} ';
 
     /**
      * The console command description.
@@ -57,13 +65,13 @@ class MakeApiViewPageAuth extends Command
      */
     public function handle()
     {
-        $all = $this->option('all');
-
         $info = $this->argument('info');
         $group = $this->option('group');
         $path = $this->option('path');
         $name = $this->option('name');
         $description = $this->option('description') ?: '';
+        $page = $this->option('page');
+        $user = $this->option('user');
 
         if ($info && is_array($info)) {
             $group = $info[0];
@@ -84,14 +92,22 @@ class MakeApiViewPageAuth extends Command
             }
         }
 
-        if ($all) {
-            if ($all == 'page' || $all == 'p') {
+        if ($page) {
+            if ($page == 'page' || $page == 'p') {
                 $this->page();
-            } elseif ($all == 'controller' || $all == 'c') {
+            } elseif ($page == 'controller' || $page == 'c') {
                 $this->controller();
-            } elseif ($all == 'supper' || $all == 's') {
-                $this->supper();
+            } else {
+                $this->error('error: --page参数仅支持 page(p)、controller(c)参数');
             }
+        }
+
+        if ($user === 'init') {
+            $this->createUser();
+        }
+
+        if ($user === 'auth') {
+            $this->createAuth();
         }
     }
 
@@ -192,7 +208,7 @@ class MakeApiViewPageAuth extends Command
         $this->info($auth->name . ' ' . $auth->path . ' 插入成功');
     }
 
-    public function supper()
+    public function createAuth()
     {
         $paths = SystemAuth::pluck('path');
         $user = User::where('id', 1)->first();
@@ -200,7 +216,54 @@ class MakeApiViewPageAuth extends Command
             SystemUserSetting::updateOrCreate(['user_id' => $user->id], ['path' => $paths]);
             $this->info('设置超级管理员权限成功');
         } else {
-            $this->error('设置失败，请检查user、system_auth表');
+            $this->createUser();
+            $this->error('error: 请先创建用户！你可以执行php artisan --all user');
+        }
+    }
+
+    private function createUser()
+    {
+        // 创建两个角色
+        $roles = [
+            ['supper', '超级管理员', '超级管理员拥有最高权限'],
+            ['normal', '普通管理员', '除系统管理权限外的其他所有权限'],
+        ];
+        foreach ($roles as $item) {
+            $group = $item[0];
+            $name = $item[1];
+            $description = $item[2] ?? '';
+            SystemRole::updateOrCreate(['name' => $name], [
+                'group' => $group,
+                'description' => $description,
+                'sort' => 99,
+                'created_at' => now()->toDateTimeString(),
+                'updated_at' => now()->toDateTimeString(),
+            ]);
+            $this->info('创建组：' . $name . ' 完成');
+        }
+
+        // 创建三个用户
+        $emails = [
+            'supper@hz-bc.cn' => ['超级管理员', '超管'],
+            'normal@hz-bc.cn' => ['普通管理员', '普管'],
+            'user@hz-bc.cn' => ['普通用户', 'magein'],
+        ];
+        foreach ($emails as $email => $item) {
+            $user = User::updateOrCreate(['email' => $email], [
+                'name' => $item[0] ?? '',
+                'nickname' => $item[1] ?? '',
+                'phone' => '139' . rand(1000, 9999) . rand(1000, 9999),
+                'email_verified_at' => now(),
+                'password' => "123456",
+                'pass_updated_at' => Date::now(),
+                'remember_token' => Str::random(10),
+            ]);
+            $this->info('创建用户：' . $email . ' 完成');
+            if ($user->id ?? '') {
+                SystemUserSetting::updateOrCreate(['user_id' => $user->id], [
+                    'role_id' => [$user->id],
+                ]);
+            }
         }
     }
 }
