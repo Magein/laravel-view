@@ -5,20 +5,25 @@ namespace Magein\Admin\Controllers;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\Response;
 use Magein\Admin\Service\SystemService;
+use Magein\Admin\View\ViewData;
 use Magein\Common\ApiResponse;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Request;
+use Magein\Common\Upload\Driver\UploadLocal;
 
 class System extends BaseController
 {
-    public function view()
+    public function view(Request $request)
     {
-
+        $params = $request::route()->parameters;
+        $viewData = new ViewData($params['name'], $params['action']);
+        return $viewData->response();
     }
 
-    public function upload()
+    public function upload(\Illuminate\Http\Request $request)
     {
-
+        $upload = new UploadLocal($request->file('file'));
+        $upload->move();
     }
 
     /**
