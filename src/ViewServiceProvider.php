@@ -26,11 +26,11 @@ class ViewServiceProvider extends ServiceProvider
     public function boot()
     {
         // 注册admin路由
-        $path = __DIR__ . '/admin.php';
+        $path = __DIR__ . '/router-admin.php';
         $this->loadRoutesFrom($path);
 
         // 注册视图路由
-        $path = __DIR__ . '/view.php';
+        $path = __DIR__ . '/router-view.php';
         $this->loadRoutesFrom($path);
 
         // 加载数据库迁移文件
