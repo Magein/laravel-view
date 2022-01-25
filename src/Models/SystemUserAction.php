@@ -29,9 +29,9 @@ class SystemUserAction extends BaseModel
 
     public static function booted()
     {
+
         static::creating(function ($model) {
-            $agent = new Agent();
-            $model->user_agent = $agent->getUserAgent();
+            $model->user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
             $model->ip = request()->ip();
             $model->path = request()->path();
             $model->method = request()->method();

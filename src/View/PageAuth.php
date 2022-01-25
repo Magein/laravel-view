@@ -5,6 +5,7 @@ namespace Magein\Admin\View;
 use Illuminate\Support\Facades\Auth;
 use Magein\Admin\Models\SystemUserAction;
 use Magein\Admin\Service\CacheService;
+use Magein\Admin\Service\UserService;
 use magein\tools\common\Variable;
 
 /**
@@ -40,8 +41,6 @@ class PageAuth
         'recovery' => '恢复'
     ];
 
-    public $skip = true;
-
     public function __construct($group = '', string $name = '', $list = [])
     {
         $this->group = $group;
@@ -64,20 +63,22 @@ class PageAuth
             return true;
         }
 
-        if ($this->skip) {
-            return true;
-        }
-
-        $pages = CacheService::instance()->userAuthPaths(Auth::id());
-
-        $path = Variable::instance()->pascal($name) . '/' . $action;
-
-        if (in_array($path, $pages)) {
+        $page_auth = config('view.page_auth');
+        if ($page_auth === false) {
             $this->action();
             return true;
         }
 
-        return false;
+        $pages = CacheService::instance()->userAuthPaths(UserService::id());
+
+        $path = Variable::instance()->pascal($name) . '/' . $action;
+
+        if (!in_array($path, $pages)) {
+            return false;
+        }
+
+        $this->action();
+        return true;
     }
 
     /**
@@ -85,8 +86,11 @@ class PageAuth
      */
     public function action()
     {
-        $model = new SystemUserAction();
-        $model->user_id = Auth::id();
-        $model->save();
+        $page_action = config('view.page_action');
+        if ($page_action === true) {
+            $model = new SystemUserAction();
+            $model->user_id = UserService::id();
+            $model->save();
+        }
     }
 }
