@@ -33,6 +33,7 @@ class ViewData
      * @param $name
      * @param $action
      */
+
     public function __construct($name, $action)
     {
         $this->name = $name;
@@ -44,7 +45,7 @@ class ViewData
         $mapping = config('view.page_mapping');
         try {
             $mapping = new $mapping();
-        } catch (Exception $exception) {
+        } catch (\Exception $exception) {
             $mapping = new PageMapping();
         }
 
@@ -87,6 +88,10 @@ class ViewData
     {
         $page_size = request()->input('page_size', 15);
         $trash = request()->input('_trash', 0);
+        $column = request()->input('_column', '');
+        if ($column) {
+            return self::$page->columns();
+        }
 
         $model = $this->express(self::$page->search());
 
@@ -128,18 +133,6 @@ class ViewData
         }
 
         return $record;
-    }
-
-    protected function columns()
-    {
-        $fields = self::$page->columns;
-        if ($fields) {
-            $fields = explode(',', $fields);
-        } else {
-            return [];
-        }
-
-        return self::$model->limit(200)->pluck($fields[0] ?? 'name', $fields[1] ?? 'id')->toArray();
     }
 
     /**
@@ -330,6 +323,7 @@ class ViewData
      * @param array $search
      * @return mixed
      */
+
     public function express(array $search)
     {
         $params = request()->input();
@@ -348,8 +342,8 @@ class ViewData
                 $item = explode('|', $item);
             }
 
-            $field = (string)($item[0] ?? '');
-            $express = (string)($item[1] ?? '');
+            $field = ( string )($item[0] ?? '');
+            $express = ( string )($item[1] ?? '');
             $value = $item[2] ?? '';
             if ($field === 'region') {
                 $express = 'region';
@@ -380,7 +374,7 @@ class ViewData
                     }
                     break;
                 case 'date':
-                    // 匹配日期范围 [2021-07-17,2021-07-18]
+                    // 匹配日期范围 [ 2021-07-17, 2021-07-18 ]
                     if (is_array($item)) {
                         $start_time = UnixTime::instance()->begin($item[0]);
                         $end_time = UnixTime::instance()->end($item[1]);
@@ -390,7 +384,7 @@ class ViewData
                     }
                     break;
                 // 2021-07-17 22:00:00 匹配成等于
-                // 2021-07-17 22:00:00,2021-07-17 22:00:00 匹配成范围
+                // 2021-07-17 22:00:00, 2021-07-17 22:00:00 匹配成范围
                 case 'datetime':
                     if (is_array($item)) {
                         $start_time = UnixTime::instance()->unix($item[0]);

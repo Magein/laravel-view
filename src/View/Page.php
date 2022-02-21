@@ -70,6 +70,7 @@ class Page
     /**
      * @param string $model
      */
+
     public function __construct(string $model = '')
     {
         if ($model) {
@@ -80,6 +81,7 @@ class Page
     /**
      * @return PageAuth
      */
+
     public function auth(): PageAuth
     {
         if ($this->auth === null) {
@@ -92,6 +94,7 @@ class Page
      * 用方法控制可以根据逻辑返回，具备一定的扩展性
      * @return array
      */
+
     public function with(): array
     {
         return $this->with;
@@ -100,6 +103,7 @@ class Page
     /**
      * @return array
      */
+
     public function append(): array
     {
         return $this->append;
@@ -108,6 +112,7 @@ class Page
     /**
      * @return array
      */
+
     public function fields(): array
     {
         return $this->fields;
@@ -134,6 +139,7 @@ class Page
     /**
      * @return array
      */
+
     public function rules(): array
     {
         return $this->rules;
@@ -142,9 +148,19 @@ class Page
     /**
      * @return array
      */
+
     public function message(): array
     {
         return $this->message;
+    }
+
+    public function columns()
+    {
+        $model = $this->model;
+        if (!$this->columns) {
+            return [];
+        }
+        return (new $model())->limit(200)->pluck($this->columns, 'id')->toArray();
     }
 
     /**
@@ -152,16 +168,17 @@ class Page
      * 例如
      *$example = [
      * '字段',
-     * ['字段', '表达式,为空表示等于', '值'],
-     * ['status', '', '1'],
-     * ['status', 'gt', '1'],
-     * ['name', 'like'],
-     * ['name', 'like', 'jak'],
+     * [ '字段', '表达式,为空表示等于', '值' ],
+     * [ 'status', '', '1' ],
+     * [ 'status', 'gt', '1' ],
+     * [ 'name', 'like' ],
+     * [ 'name', 'like', 'jak' ],
      * 'name|like',
      * 'name|like|jak',
      * ];
      * @return array
      */
+
     public function search(array $params = []): array
     {
         return array_merge($this->search, $params);
@@ -173,6 +190,7 @@ class Page
      * @param $action
      * @return mixed
      */
+
     public function complete($result, $action)
     {
         return $result;
@@ -206,6 +224,7 @@ class Page
      * @param array $message
      * @return array|MsgContainer
      */
+
     public function post(array $data = [], array $rule = [], array $message = [])
     {
         return $this->validate($data, $rule, $message);
@@ -217,6 +236,7 @@ class Page
      * @param array $message
      * @return array|MsgContainer
      */
+
     public function put(array $data = [], array $rule = [], array $message = [])
     {
         return $this->validate($data, $rule, $message);
@@ -225,6 +245,7 @@ class Page
     /**
      * @return string[]
      */
+
     public function patch(): array
     {
         return [
