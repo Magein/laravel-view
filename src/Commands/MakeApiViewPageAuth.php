@@ -39,7 +39,7 @@ class MakeApiViewPageAuth extends Command
      *
      * @var string
      */
-    protected $signature = 'view:vue {info?*}  {--G|group=} {--N|name=} {--P|path=} {--D|description=} {--page=} {--user=} ';
+    protected $signature = 'view:auth {info?*}  {--G|group=} {--N|name=} {--P|path=} {--D|description=} {--page=} {--user=} ';
 
     /**
      * The console command description.
