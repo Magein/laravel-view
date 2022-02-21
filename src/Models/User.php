@@ -7,6 +7,14 @@ use Laravel\Sanctum\HasApiTokens;
 use Magein\Common\AssetPath;
 use Magein\Common\BaseModel;
 
+use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
+use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+use Illuminate\Auth\Authenticatable;
+use Illuminate\Auth\MustVerifyEmail;
+use Illuminate\Auth\Passwords\CanResetPassword;
+use Illuminate\Foundation\Auth\Access\Authorizable;
+
 /**
  * @property integer $id
  * @property string $phone
@@ -23,9 +31,13 @@ use Magein\Common\BaseModel;
  * @property string $updated_at
  * @property string $deleted_at
  */
-class User extends BaseModel
+class User extends BaseModel implements AuthenticatableContract,AuthorizableContract,CanResetPasswordContract
 {
     use HasApiTokens;
+    use Authenticatable;
+    use Authorizable;
+    use CanResetPassword;
+    use MustVerifyEmail;
 
     /**
      * The attributes that are mass assignable.
