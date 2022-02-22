@@ -36,7 +36,7 @@ class PageAuth
         'patch' => '修改',
         'get' => '获取',
         'list' => '列表',
-        'trash' => '回收',
+        'trash' => '垃圾箱',
         'clean' => '清除',
         'recovery' => '恢复'
     ];

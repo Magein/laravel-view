@@ -115,15 +115,19 @@ class MakeApiViewPageAuth extends Command
     private function page()
     {
         $page_path = config('view.page_path');
-        $real_path = preg_replace('/App/', '', $page_path);
+        $real_path = preg_replace(['/App/', '/\\\\/'], ['', '/'], $page_path);
         $path = app_path() . $real_path;
         $files = glob($path . '/*');
         if ($files) {
+
+            $getName = function ($first, $second) {
+                return trim($first . '.' . $second, '.');
+            };
+
             foreach ($files as $file) {
                 $filename = pathinfo($file, PATHINFO_FILENAME);
                 $path = preg_replace('/Page/', '', $filename);
                 $namespace = $page_path . '\\' . $filename;
-
                 if (class_exists($namespace)) {
                     $pageClass = new $namespace();
                     if (method_exists($pageClass, 'auth')) {
@@ -136,12 +140,32 @@ class MakeApiViewPageAuth extends Command
                         $group = $auth->group;
                         if ($list && $group) {
                             foreach ($list as $key => $item) {
-                                $this->insert($path . '/' . $key, $group, $name . $item);
+                                $this->insert($path . '/' . $key, $group, $getName($name, $item));
                             }
                         }
                     }
                 }
             }
+
+            // 系统路径
+            $pageAuth = new PageAuth();
+            $lists = $pageAuth->list;
+            $system = [
+                'User' => '用户',
+                'SystemRole' => '角色',
+                'SystemAuth' => '权限',
+                'SystemUserAction' => '行为日志',
+                'SystemUserSetting' => '用户设置',
+            ];
+            if ($lists) {
+                foreach ($system as $path => $name) {
+                    foreach ($lists as $key => $item) {
+                        $this->insert($path . '/' . $key, 'System', $getName($name, $item));
+                    }
+                }
+            }
+        } else {
+            $this->error($path . '路径下没有文件');
         }
     }
 
