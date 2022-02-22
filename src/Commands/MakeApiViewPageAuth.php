@@ -211,7 +211,7 @@ class MakeApiViewPageAuth extends Command
 
     public function createAuth()
     {
-        $paths = SystemAuth::pluck('path');
+        $paths = SystemAuth::pluck('path')->toArray();
         if (!$paths) {
             $this->error('请先生成权限路径');
             exit();
