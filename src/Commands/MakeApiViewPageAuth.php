@@ -35,11 +35,11 @@ class MakeApiViewPageAuth extends Command
      * php artisan view:auth --user
      *
      * 初始化的时候，需要创建超级管理员的所有权限
-     * php artisan view:auth --user=supper
+     * php artisan view:auth --supper
      *
      * @var string
      */
-    protected $signature = 'view:auth {info?*}  {--G|group=} {--N|name=} {--P|path=} {--D|description=} {--page=} {--user=} ';
+    protected $signature = 'view:auth {info?*}  {--G|group=} {--N|name=} {--P|path=} {--D|description=} {--page=} {--user} {--supper}  ';
 
     /**
      * The console command description.
@@ -72,6 +72,7 @@ class MakeApiViewPageAuth extends Command
         $description = $this->option('description') ?: '';
         $page = $this->option('page');
         $user = $this->option('user');
+        $supper = $this->option('supper');
 
         if ($info && is_array($info)) {
             $group = $info[0];
@@ -102,11 +103,11 @@ class MakeApiViewPageAuth extends Command
             }
         }
 
-        if ($user === 'init') {
+        if ($user) {
             $this->createUser();
         }
 
-        if ($user === 'auth') {
+        if ($supper) {
             $this->createAuth();
         }
     }
@@ -211,6 +212,10 @@ class MakeApiViewPageAuth extends Command
     public function createAuth()
     {
         $paths = SystemAuth::pluck('path');
+        if (!$paths) {
+            $this->error('请先生成权限路径');
+            exit();
+        }
         $user = User::where('id', 1)->first();
         if ($paths && ($user->id ?? 0)) {
             SystemUserSetting::updateOrCreate(['user_id' => $user->id], ['path' => $paths]);
