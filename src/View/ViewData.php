@@ -138,7 +138,7 @@ class ViewData
     /**
      * @return int|bool|MsgContainer
      */
-    protected function post()
+    protected function create()
     {
         $data = self::$page->post();
         if (empty($data) || !is_array($data)) {
@@ -174,7 +174,7 @@ class ViewData
     /**
      * @return int|bool|MsgContainer
      */
-    protected function put()
+    protected function edit()
     {
         $id = request()->input('id', 0);
 
@@ -215,7 +215,7 @@ class ViewData
     /**
      * @return int|bool|MsgContainer
      */
-    protected function patch()
+    protected function update()
     {
         $id = request()->input('id', 0);
 
@@ -249,7 +249,7 @@ class ViewData
      * 移动到回收站
      * @return int|MsgContainer
      */
-    protected function trash()
+    protected function delete()
     {
         $ids = request()->input('ids');
 
@@ -291,10 +291,9 @@ class ViewData
 
     /**
      * 恢复数据
-     * 这里使用了patch 用户更新一个字段，即delete_time从有值变成0
      * @return int|MsgContainer
      */
-    protected function recovery()
+    protected function restore()
     {
         $ids = request()->input('ids');
 

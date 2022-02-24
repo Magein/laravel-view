@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use Magein\Admin\Models\SystemUserAction;
 use Magein\Admin\Service\CacheService;
 use Magein\Admin\Service\UserService;
+use Magein\Common\MsgContainer;
 use magein\tools\common\Variable;
 
 /**
@@ -31,14 +32,14 @@ class PageAuth
      * @var array
      */
     public $list = [
-        'post' => '新增',
-        'put' => '编辑',
-        'patch' => '修改',
+        'create' => '新增',
+        'edit' => '编辑',
+        'update' => '更新',
         'get' => '获取',
         'list' => '列表',
-        'trash' => '垃圾箱',
+        'delete' => '删除',
+        'restore' => '恢复',
         'clean' => '清除',
-        'recovery' => '恢复'
     ];
 
     public function __construct($group = '', string $name = '', $list = [])
@@ -71,7 +72,7 @@ class PageAuth
 
         $pages = CacheService::instance()->userAuthPaths(UserService::id());
 
-        $path = Variable::instance()->pascal($name) . '/' . $action;
+        $path = Variable::instance()->pascal($name) . '/' . Variable::instance()->camelCase($action);
 
         if (!in_array($path, $pages)) {
             return false;

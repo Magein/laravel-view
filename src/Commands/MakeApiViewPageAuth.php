@@ -16,20 +16,17 @@ class MakeApiViewPageAuth extends Command
 {
     /**
      * The name and signature of the console command.
-     *                          分组          路径             名称     描述
-     * php artisan view:auth system_role  role/post  新增角色  管理员新增角色
-     * php artisan view:auth --group=role --p=admin/role/add --n=新增角色 --d=管理员新增角色
-     * php artisan view:auth -G role -P admin/role/add -N 新增角色 -D 管理员新增角色
-     * php artisan view:auth -G role -P admin/role/add
+     * 创建权限                      分组          路径        名称      描述
+     * php artisan view:auth --add="system_role  role/post  新增角色  管理员新增角色"
      *
-     * 下面命令将创建Admin\View\Page\SystemRolePage的restful权限 包含：post、put、patch、get、list、trash、clean、recovery
-     * php artisan view:auth system_role 角色
+     * 下面命令将创建 system_role 的资源权限
+     * php artisan view:auth --res="system(组名称)  system_role（对应SystemRolePage或者SystemRoleModel） 名称（如：角色，用户，文章）"
      *
-     * 下面命令将创建Admin\View\Page\**Page.php的resetful权限，会根据**Page.php类中的auth方法生成
-     * php artisan view:auth --page=page
+     * 检索 View/Page/*.php 和 配置文件中的page路径并进行路径创建
+     * php artisan view:auth --page
      *
      * 下面命将创建Admin\Controller\**.php中方法的权限,文件中需要包含@requestAuth
-     * php artisan view:auth --page=controller
+     * php artisan view:auth --controller
      *
      * 创建用户、用户组
      * php artisan view:auth --user
@@ -39,14 +36,14 @@ class MakeApiViewPageAuth extends Command
      *
      * @var string
      */
-    protected $signature = 'view:auth {info?*}  {--G|group=} {--N|name=} {--P|path=} {--D|description=} {--page=} {--user} {--supper}  ';
+    protected $signature = 'view:auth {--A|add=} {--res=} {--controller} {--page} {--user} {--supper}  ';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = '创建page controller的接口';
+    protected $description = '创建用户、权限命令';
 
     /**
      * Create a new command instance.
@@ -65,42 +62,28 @@ class MakeApiViewPageAuth extends Command
      */
     public function handle()
     {
-        $info = $this->argument('info');
-        $group = $this->option('group');
-        $path = $this->option('path');
-        $name = $this->option('name');
-        $description = $this->option('description') ?: '';
+        $add = $this->option('add');
+        $res = $this->option('res');
         $page = $this->option('page');
+        $controller = $this->option('controller');
         $user = $this->option('user');
         $supper = $this->option('supper');
 
-        if ($info && is_array($info)) {
-            $group = $info[0];
-            $path = $info[1];
-            $name = $info[2] ?? '';
-            $description = $info[3] ?? '';
+
+        if ($add) {
+            $this->add($add);
         }
 
-        if ($group && $path && $name) {
-            try {
-                $this->insert($path, $group, $name, $description);
-            } catch (\Exception $exception) {
-                if (preg_match('/1062 Duplicate entry/', $exception->getMessage())) {
-                    $this->error('权限路径已经存在:' . $path);
-                } else {
-                    $this->error($exception->getMessage());
-                }
-            }
+        if ($res) {
+            $this->resource($res);
         }
 
         if ($page) {
-            if ($page == 'page' || $page == 'p') {
-                $this->page();
-            } elseif ($page == 'controller' || $page == 'c') {
-                $this->controller();
-            } else {
-                $this->error('error: --page参数仅支持 page(p)、controller(c)参数');
-            }
+            $this->page();
+        }
+
+        if ($controller) {
+            $this->controller();
         }
 
         if ($user) {
@@ -112,6 +95,41 @@ class MakeApiViewPageAuth extends Command
         }
     }
 
+    private function add($params)
+    {
+        $params = $this->getParams($params);
+        if (empty($params)) {
+            $this->error('新增权限路径失败:参数不正确,应该输入 group path name desc四个参数，如--add="system role/post 角色新增 用户区分系统用户角色 "');
+        }
+
+        try {
+            $this->insert($params['path'], $params['group'], $params['name'], $params['desc']);
+        } catch (\Exception $exception) {
+            if (preg_match('/1062 Duplicate entry/', $exception->getMessage())) {
+                $this->error('权限路径已经存在:' . $path);
+            } else {
+                $this->error($exception->getMessage());
+            }
+        }
+    }
+
+    private function resource($params)
+    {
+        $params = $this->getParams($params);
+        $resource = $params['path'];
+        if (!preg_match('/^[a-zA-Z_]+$/', $resource)) {
+            $this->error('资源权限名称错误(可行的值如role、user)，输入的值：' . $resource);
+        }
+        // 系统路径
+        $pageAuth = new PageAuth();
+        $lists = $pageAuth->list;
+        if ($lists) {
+            foreach ($lists as $key => $item) {
+                $this->insert($params['path'] . '/' . $key, $params['group'], $this->concatName($params['name'], $item));
+            }
+        }
+    }
+
     private function page()
     {
         $page_path = config('view.page_path');
@@ -119,11 +137,23 @@ class MakeApiViewPageAuth extends Command
         $path = app_path() . $real_path;
         $files = glob($path . '/*');
         if ($files) {
-
-            $getName = function ($first, $second) {
-                return trim($first . '.' . $second, '.');
-            };
-
+            // 系统路径
+            $pageAuth = new PageAuth();
+            $lists = $pageAuth->list;
+            $system = [
+                'User' => '用户',
+                'SystemRole' => '角色',
+                'SystemAuth' => '权限',
+                'SystemUserAction' => '行为日志',
+                'SystemUserSetting' => '用户设置',
+            ];
+            if ($lists) {
+                foreach ($system as $path => $name) {
+                    foreach ($lists as $key => $item) {
+                        $this->insert($path . '/' . $key, 'System', $this->concatName($name, $item));
+                    }
+                }
+            }
             foreach ($files as $file) {
                 $filename = pathinfo($file, PATHINFO_FILENAME);
                 $path = preg_replace('/Page/', '', $filename);
@@ -140,27 +170,9 @@ class MakeApiViewPageAuth extends Command
                         $group = $auth->group;
                         if ($list && $group) {
                             foreach ($list as $key => $item) {
-                                $this->insert($path . '/' . $key, $group, $getName($name, $item));
+                                $this->insert($path . '/' . $key, $group, $this->concatName($name, $item));
                             }
                         }
-                    }
-                }
-            }
-
-            // 系统路径
-            $pageAuth = new PageAuth();
-            $lists = $pageAuth->list;
-            $system = [
-                'User' => '用户',
-                'SystemRole' => '角色',
-                'SystemAuth' => '权限',
-                'SystemUserAction' => '行为日志',
-                'SystemUserSetting' => '用户设置',
-            ];
-            if ($lists) {
-                foreach ($system as $path => $name) {
-                    foreach ($lists as $key => $item) {
-                        $this->insert($path . '/' . $key, 'System', $getName($name, $item));
                     }
                 }
             }
@@ -204,6 +216,32 @@ class MakeApiViewPageAuth extends Command
         $path = preg_replace('/([\W]*)([\w\/]*)/', '$2', $path);
         $path = preg_replace('/([\d]*)([A-Za-z_\/]*)/', '$2', $path);
         return Variable::instance()->camelCase($path);
+    }
+
+    private function getParams($params)
+    {
+        $params = explode(' ', $params);
+        $params = array_filter($params);
+
+        if (empty($params)) {
+            return [];
+        }
+
+        if (!($params[0] ?? '') || !($params[1] ?? '') || !($params[2] ?? '')) {
+            return [];
+        }
+
+        return [
+            'group' => $params[0],
+            'path' => $params[1],
+            'name' => $params[2],
+            'desc' => $params[3] ?? '',
+        ];
+    }
+
+    private function concatName($first, $second)
+    {
+        return trim($second . $first, '');
     }
 
     /**

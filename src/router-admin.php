@@ -13,13 +13,13 @@ Route::prefix('admin')->group(function () {
         Route::post('lbp', [User::class, 'loginByPhone']);
         Route::post('lbq', [User::class, 'loginByQrcode']);
         Route::post('findpass', [User::class, 'findPass']);
-        Route::get('logout', [User::class, 'logout']);
     });
     Route::middleware('auth:sanctum')->group(function () {
         /**
          * 个人中心 设置个人信息，修改密码，上传头像等等
          */
         Route::prefix('uc')->group(function () {
+            Route::get('logout', [UserCenter::class, 'logout']);
             Route::get('getUserInfo', [UserCenter::class, 'getInfo']);
             Route::post('setUserInfo', [UserCenter::class, 'setUserInfo']);
             Route::post('setPassword', [UserCenter::class, 'setPassword']);

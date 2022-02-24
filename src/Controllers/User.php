@@ -33,13 +33,4 @@ class User extends BaseController
     {
 
     }
-
-    public function logout(Request $request)
-    {
-        if ($request::user()) {
-            $request::user()->currentAccessToken()->delete();
-        }
-
-        return ApiResponse::success('success');
-    }
 }

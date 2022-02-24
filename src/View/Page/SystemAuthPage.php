@@ -13,7 +13,7 @@ class SystemAuthPage extends Page
 
     public $search = [
         'group',
-        'name',
+        ['name', 'like'],
         'path'
     ];
 
