@@ -225,7 +225,7 @@ class Page
      * @return array|MsgContainer
      */
 
-    public function post(array $data = [], array $rule = [], array $message = [])
+    public function create(array $data = [], array $rule = [], array $message = [])
     {
         return $this->validate($data, $rule, $message);
     }
@@ -237,7 +237,7 @@ class Page
      * @return array|MsgContainer
      */
 
-    public function put(array $data = [], array $rule = [], array $message = [])
+    public function edit(array $data = [], array $rule = [], array $message = [])
     {
         return $this->validate($data, $rule, $message);
     }
@@ -246,7 +246,7 @@ class Page
      * @return string[]
      */
 
-    public function patch(): array
+    public function update(): array
     {
         return [
             'status',

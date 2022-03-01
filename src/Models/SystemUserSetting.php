@@ -23,11 +23,6 @@ class SystemUserSetting extends BaseModel
         'theme',
     ];
 
-    protected $casts = [
-        'path' => 'array',
-        'role_id' => 'array'
-    ];
-
     protected static function booted()
     {
         static::saving(function ($model) {
@@ -45,10 +40,52 @@ class SystemUserSetting extends BaseModel
 
     public function setPathAttribute($value)
     {
-        if (is_array($value)) {
-            $value = array_values($value);
+        if ($value && is_array($value)) {
+            $value = array_unique($value);
+            $value = array_filter($value);
+            $value = implode(',', $value);
         }
 
         return $this->attributes['path'] = $value;
+    }
+
+    public function getPathAttribute($value)
+    {
+        if ($value && is_string($value)) {
+            $value = explode(',', $value);
+        } else {
+            $value = [];
+        }
+
+        return $value;
+    }
+
+    public function setRoleIdAttribute($value)
+    {
+        if (is_array($value)) {
+            $value = array_reduce($value, function ($res, $item) {
+                $res[] = intval($item);
+                return $res;
+            });
+        } else {
+            $value = explode(',', $value);
+        }
+
+        $value = array_filter($value);
+        $value = array_unique($value);
+        $value = implode(',', $value);
+
+        $this->attributes['role_id'] = $value ?: '';
+    }
+
+    public function getRoleIdAttribute($value)
+    {
+        if ($value && is_string($value)) {
+            $value = explode(',', $value);
+        } else {
+            $value = [];
+        }
+
+        return $value;
     }
 }

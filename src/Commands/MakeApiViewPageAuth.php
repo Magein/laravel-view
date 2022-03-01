@@ -290,10 +290,11 @@ class MakeApiViewPageAuth extends Command
 
     private function createUser()
     {
-        // 创建两个角色
+        // 创建三个角色
         $roles = [
-            ['supper', '超级管理员', '超级管理员拥有最高权限'],
-            ['normal', '普通管理员', '除系统管理权限外的其他所有权限'],
+            ['admin', '超级管理员', '超级管理员拥有最高权限'],
+            ['admin', '普通管理员', '除系统管理权限外的其他所有权限'],
+            ['user', '普通用户', '普通用户'],
         ];
         foreach ($roles as $item) {
             $group = $item[0];

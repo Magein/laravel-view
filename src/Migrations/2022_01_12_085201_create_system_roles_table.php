@@ -18,6 +18,7 @@ class CreateSystemRolesTable extends Migration
             $table->string('group', 30)->comment('角色组');
             $table->string('name', 30)->comment('角色名称');
             $table->string('description', 140)->default('')->comment('角色描述');
+            $table->text('path')->comment('权限路径');
             $table->tinyInteger('sort')->default(99)->comment('排序');
             $table->timestamps();
             $table->softDeletes();

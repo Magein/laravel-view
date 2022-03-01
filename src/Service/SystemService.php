@@ -3,6 +3,7 @@
 namespace Magein\Admin\Service;
 
 use Magein\Admin\Models\SystemAuth;
+use Magein\Admin\Models\SystemRole;
 use Magein\Admin\Models\SystemUserSetting;
 use Magein\Common\BaseService;
 
@@ -43,23 +44,26 @@ class SystemService extends BaseService
     }
 
     /**
-     * @param int $user_id
+     * @param array $user_id
      * @param array $auth_id
      * @return bool
      */
-    public function setUserAuth(int $user_id, array $auth_id)
+    public function setUserAuth(array $user_id, array $auth_id)
     {
         $params = $this->checkAuthParams($user_id, $auth_id);
         if (empty($params)) {
             return false;
         }
         list($user_id, $auth_id) = $params;
-        $paths = SystemAuth::whereIn('id', $auth_id)->pluck('path');
+        $paths = SystemAuth::whereIn('id', $auth_id)->pluck('path')->toArray();
         if (empty($paths)) {
             return false;
         }
         foreach ($user_id as $uuid) {
-            SystemUserSetting::updateOrCreate(['user_id' => intval($uuid)], ['path' => $paths]);
+            $userSetting = SystemUserSetting::where('user_id', $uuid)->first();
+            $path = $userSetting->path ?: [];
+            $userSetting->path = array_merge($path, $paths);
+            $userSetting->save();
         }
         return true;
     }
@@ -96,7 +100,22 @@ class SystemService extends BaseService
             return false;
         }
 
-        return SystemUserSetting::updateOrCreate(['user_id' => intval($user_id)], ['role_id' => $role_id]);
+        // 获取角色下的权限路径
+        $role_paths = SystemRole::whereIn('id', $role_id)->pluck('path')->toArray();
+        $paths = [];
+        if ($role_paths) {
+            foreach ($role_paths as $item) {
+                $paths = array_merge($paths, $item);
+            }
+        }
+
+        $setting = SystemUserSetting::where('user_id', intval($user_id))->first();
+
+        if ($setting) {
+            $paths = array_merge($setting->path, $paths);
+        }
+
+        return SystemUserSetting::updateOrCreate(['user_id' => intval($user_id)], ['role_id' => $role_id, 'path' => $paths]);
     }
 
     /**
@@ -121,23 +140,32 @@ class SystemService extends BaseService
         }
 
         $paths = $paths->toArray();
-        $users = SystemUserSetting::all();
-        if ($users->isEmpty()) {
+        foreach ($role_id as $item) {
+            $role = SystemRole::find($item);
+            if ($role) {
+                $role_path = array_merge($role->path, $paths);
+                $role->path = $role_path;
+                $role->save();
+            }
+        }
+
+        $userSetting = SystemUserSetting::all();
+        if ($userSetting->isEmpty()) {
             return true;
         }
 
-        foreach ($users as $user) {
+        foreach ($userSetting as $user) {
             $user_role_id = $user->role_id ?? [];
             if (empty($user_role_id)) {
                 continue;
             }
+
             // 计算交集，有交集这表示用户需要赋予全选
             $user_paths = $user->path ?? [];
             if (array_intersect($user_role_id, $role_id)) {
                 $user_paths = array_merge($user_paths, $paths);
             }
             $user_paths = array_unique($user_paths);
-
             SystemUserSetting::updateOrCreate(['user_id' => $user->user_id], ['path' => $user_paths]);
         }
 

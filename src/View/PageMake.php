@@ -147,16 +147,15 @@ class PageMake
         return <<<EOF
 <template>
     <div>
-        <dataView :page="page" @report="report"></dataView>
+        <ViewPage :page="page" @report="report"></ViewPage>
     </div>
 </template>
 
 <script lang="ts">
-import dataView from '/@/common/render/dataView.vue';
-import { Page } from '/@/common/page.ts';
+import { ViewPage, Page } from '/@/vpage';
 export default {
     components: {
-      dataView
+      ViewPage
     },
     setup() {
         const dictionaries=$dictionary;

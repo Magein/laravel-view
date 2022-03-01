@@ -140,7 +140,7 @@ class ViewData
      */
     protected function create()
     {
-        $data = self::$page->post();
+        $data = self::$page->create();
         if (empty($data) || !is_array($data)) {
             return $data;
         }
@@ -182,7 +182,7 @@ class ViewData
             return new MsgContainer('数据更新异常:not found key');
         }
 
-        $data = self::$page->put();
+        $data = self::$page->edit();
         if (empty($data) || !is_array($data)) {
             return $data;
         }
@@ -226,7 +226,7 @@ class ViewData
         $key = request()->input('key', '');
         $value = request()->input('value', '');
 
-        if (!in_array($key, self::$page->patch())) {
+        if (!in_array($key, self::$page->update())) {
             return new MsgContainer('不允许更新字段信息');
         }
 
@@ -336,11 +336,11 @@ class ViewData
 
         $model = self::$model;
 
+
         foreach ($search as $item) {
             if (is_string($item)) {
                 $item = explode('|', $item);
             }
-
             $field = ( string )($item[0] ?? '');
             $express = ( string )($item[1] ?? '');
             $value = $item[2] ?? '';
@@ -348,16 +348,14 @@ class ViewData
                 $express = 'region';
             }
             $value = !$is_empty($value) ? $value : ($params[$field] ?? '');
-
             if (is_array($value)) {
-                $express = 'in';
+                $express = $express === 'region' ? 'region' : 'in';
             } else {
                 $value = trim($value);
                 if ($is_empty($value)) {
                     continue;
                 }
             }
-
             switch ($express) {
                 case 'like':
                     $model = $model->where($field, 'like', '%' . $value . '%');
