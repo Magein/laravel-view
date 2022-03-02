@@ -1,9 +1,10 @@
 <?php
 
 namespace Magein\Admin\Service;
-
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Support\Facades\Validator;
 use Magein\Admin\Models\User;
+use Magein\Admin\View\Page\UserPage;
 use Magein\Common\BaseService;
 use Magein\Common\MsgContainer;
 use Illuminate\Support\Facades\Hash;
@@ -32,6 +33,12 @@ class UserService extends BaseService
         if (!self::id()) {
             return MsgContainer::msg('请先登录', 403);
         }
+        $userPage = new UserPage();
+        $validate = Validator::make($data, $userPage->rules, $userPage->message);
+        if ($validate->fails()) {
+            return MsgContainer::msg($validate->errors()->first());
+        }
+
         $user = User::find(self::id());
         $user->fill($data);
         return $user->save();

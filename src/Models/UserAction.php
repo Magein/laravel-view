@@ -5,18 +5,14 @@ namespace Magein\Admin\Models;
 use Magein\Common\BaseModel;
 
 /**
- * @property integer $id
  * @property integer $user_id
  * @property string $path
  * @property string $method
  * @property string $params
  * @property string $user_agent
  * @property string $ip
- * @property string $created_at
- * @property string $updated_at
- * @property string $deleted_at
  */
-class SystemUserAction extends BaseModel
+class UserAction extends BaseModel
 {
     protected $fillable = [
         'user_id',

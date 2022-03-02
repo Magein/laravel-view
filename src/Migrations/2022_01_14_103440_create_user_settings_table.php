@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateSystemUserSettingsTable extends Migration
+class CreateUserSettingsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,15 +13,17 @@ class CreateSystemUserSettingsTable extends Migration
      */
     public function up()
     {
-        Schema::create('system_user_settings', function (Blueprint $table) {
+        Schema::create('user_settings', function (Blueprint $table) {
             $table->id();
             $table->string('user_id', 30)->unique()->comment('用户标识');
-            $table->text('path')->comment('权限路径');
-            $table->string('role_id')->comment('角色')->default('');
+            $table->string('role_id')->comment('所属角色')->default('');
+            $table->string('permission_id')->comment('拥有权限');
             $table->text('theme')->comment('主题设置');
             $table->timestamps();
             $table->softDeletes();
         });
+
+        \Illuminate\Support\Facades\DB::statement("ALTER TABLE `user_settings` comment '用户设置表'");
     }
 
     /**

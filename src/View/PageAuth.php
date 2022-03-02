@@ -2,11 +2,9 @@
 
 namespace Magein\Admin\View;
 
-use Illuminate\Support\Facades\Auth;
-use Magein\Admin\Models\SystemUserAction;
+use Magein\Admin\Models\UserAction;
 use Magein\Admin\Service\CacheService;
 use Magein\Admin\Service\UserService;
-use Magein\Common\MsgContainer;
 use magein\tools\common\Variable;
 
 /**
@@ -89,7 +87,7 @@ class PageAuth
     {
         $page_action = config('view.page_action');
         if ($page_action === true) {
-            $model = new SystemUserAction();
+            $model = new UserAction();
             $model->user_id = UserService::id();
             $model->save();
         }

@@ -2,12 +2,12 @@
 
 namespace Magein\Admin\View\Page;
 
-use Magein\Admin\Models\SystemAuth;
+use Magein\Admin\Models\SystemPermission;
 use Magein\Admin\View\Page;
 
-class SystemAuthPage extends Page
+class SystemPermissionPage extends Page
 {
-    public $model = SystemAuth::class;
+    public $model = SystemPermission::class;
 
     public $auth = '权限';
 

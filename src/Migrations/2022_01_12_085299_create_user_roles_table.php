@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateSystemRolesTable extends Migration
+class CreateUserRolesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,16 +13,18 @@ class CreateSystemRolesTable extends Migration
      */
     public function up()
     {
-        Schema::create('system_roles', function (Blueprint $table) {
+        Schema::create('user_roles', function (Blueprint $table) {
             $table->id();
             $table->string('group', 30)->comment('角色组');
             $table->string('name', 30)->comment('角色名称');
             $table->string('description', 140)->default('')->comment('角色描述');
-            $table->text('path')->comment('权限路径');
+            $table->string('permission_id', 800)->default('')->comment('权限ID');
             $table->tinyInteger('sort')->default(99)->comment('排序');
             $table->timestamps();
             $table->softDeletes();
         });
+
+        \Illuminate\Support\Facades\DB::statement("ALTER TABLE `user_roles` comment '用户角色表'");
     }
 
     /**

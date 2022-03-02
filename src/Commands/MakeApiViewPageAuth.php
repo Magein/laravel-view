@@ -5,9 +5,9 @@ namespace Magein\Admin\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Str;
-use Magein\Admin\Models\SystemAuth;
-use Magein\Admin\Models\SystemRole;
-use Magein\Admin\Models\SystemUserSetting;
+use Magein\Admin\Models\SystemPermission;
+use Magein\Admin\Models\UserRole;
+use Magein\Admin\Models\UserSetting;
 use Magein\Admin\Models\User;
 use Magein\Admin\View\PageAuth;
 use magein\tools\common\Variable;
@@ -20,7 +20,7 @@ class MakeApiViewPageAuth extends Command
      * php artisan view:auth --add="system_role  role/post  新增角色  管理员新增角色"
      *
      * 下面命令将创建 system_role 的资源权限
-     * php artisan view:auth --res="system(组名称)  system_role（对应SystemRolePage或者SystemRoleModel） 名称（如：角色，用户，文章）"
+     * php artisan view:auth --res="system(组名称)  system_role（对应UserRolePage或者UserRoleModel） 名称（如：角色，用户，文章）"
      *
      * 检索 View/Page/*.php 和 配置文件中的page路径并进行路径创建
      * php artisan view:auth --page
@@ -106,7 +106,7 @@ class MakeApiViewPageAuth extends Command
             $this->insert($params['path'], $params['group'], $params['name'], $params['desc']);
         } catch (\Exception $exception) {
             if (preg_match('/1062 Duplicate entry/', $exception->getMessage())) {
-                $this->error('权限路径已经存在:' . $path);
+                $this->error('权限路径已经存在:' . $params['path']);
             } else {
                 $this->error($exception->getMessage());
             }
@@ -142,10 +142,10 @@ class MakeApiViewPageAuth extends Command
             $lists = $pageAuth->list;
             $system = [
                 'User' => '用户',
-                'SystemRole' => '角色',
-                'SystemAuth' => '权限',
-                'SystemUserAction' => '行为日志',
-                'SystemUserSetting' => '用户设置',
+                'UserRole' => '角色',
+                'UserAction' => '行为日志',
+                'UserSetting' => '用户设置',
+                'SystemPermission' => '权限',
             ];
             if ($lists) {
                 foreach ($system as $path => $name) {
@@ -253,7 +253,7 @@ class MakeApiViewPageAuth extends Command
     private function insert(string $path, string $group, string $name, string $description = '')
     {
         if ($path = $this->getPath($path)) {
-            $this->success(SystemAuth::updateOrCreate(
+            $this->success(SystemPermission::updateOrCreate(
                 ['path' => $path],
                 [
                     'name' => $name,
@@ -266,21 +266,21 @@ class MakeApiViewPageAuth extends Command
         }
     }
 
-    private function success(SystemAuth $auth)
+    private function success(SystemPermission $auth)
     {
         $this->info($auth->name . ' ' . $auth->path . ' 插入成功');
     }
 
     public function createAuth()
     {
-        $paths = SystemAuth::pluck('path')->toArray();
+        $paths = SystemPermission::pluck('path')->toArray();
         if (!$paths) {
             $this->error('请先生成权限路径');
             exit();
         }
         $user = User::where('id', 1)->first();
         if ($paths && ($user->id ?? 0)) {
-            SystemUserSetting::updateOrCreate(['user_id' => $user->id], ['path' => $paths]);
+            UserSetting::updateOrCreate(['user_id' => $user->id], ['path' => $paths]);
             $this->info('设置超级管理员权限成功');
         } else {
             $this->createUser();
@@ -300,7 +300,7 @@ class MakeApiViewPageAuth extends Command
             $group = $item[0];
             $name = $item[1];
             $description = $item[2] ?? '';
-            SystemRole::updateOrCreate(['name' => $name], [
+            UserRole::updateOrCreate(['name' => $name], [
                 'group' => $group,
                 'description' => $description,
                 'sort' => 99,
@@ -328,7 +328,7 @@ class MakeApiViewPageAuth extends Command
             ]);
             $this->info('创建用户：' . $email . ' 完成');
             if ($user->id ?? '') {
-                SystemUserSetting::updateOrCreate(['user_id' => $user->id], [
+                UserSetting::updateOrCreate(['user_id' => $user->id], [
                     'role_id' => [$user->id],
                 ]);
             }

@@ -3,6 +3,7 @@
 namespace Magein\Admin\View\Page;
 
 use Magein\Admin\Models\User;
+use Magein\Admin\Service\SystemService;
 use Magein\Admin\View\Page;
 
 class UserPage extends Page
@@ -17,10 +18,10 @@ class UserPage extends Page
     ];
 
     public $rules = [
+        'phone' => 'bail|required|string|size:11',
         'email' => 'bail|required|string|max:191',
         'name' => 'bail|required|string|max:6',
         'nickname' => 'bail|required|string|max:30',
-        'phone' => 'bail|required|string|size:11',
     ];
 
     public $message = [
@@ -47,4 +48,16 @@ class UserPage extends Page
         'avatar.max' => '头像最大长度为191',
     ];
 
+    public function complete($result, $action)
+    {
+        if ($result && ($action == 'create' || $action == 'edit')) {
+            $user_id = request()->input('id');
+            $role_id = request()->input('role_id');
+            if ($user_id && $role_id) {
+                SystemService::instance()->setUserRole($user_id, $role_id);
+            }
+        }
+
+        return parent::complete($result, $action);
+    }
 }

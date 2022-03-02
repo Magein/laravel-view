@@ -76,20 +76,6 @@ class System extends BaseController
     }
 
     /**
-     * @aname 设置用户角色
-     * @adesc 重置用户的角色
-     * @param Request $request
-     * @return ResponseFactory|Response
-     */
-    public function setUserRole(Request $request)
-    {
-        $user_id = $request::input('user_id');
-        $role_id = $request::input('role_id');
-
-        return ApiResponse::auto(SystemService::instance()->setUserRole($user_id, $role_id));
-    }
-
-    /**
      * @aname 设置角色权限
      * @adesc 给拥有角色的用户追加权限
      * @param Request $request

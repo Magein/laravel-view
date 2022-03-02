@@ -2,9 +2,9 @@
 
 namespace Magein\Admin\Service;
 
-use Magein\Admin\Models\SystemAuth;
-use Magein\Admin\Models\SystemRole;
-use Magein\Admin\Models\SystemUserSetting;
+use Magein\Admin\Models\SystemPermission;
+use Magein\Admin\Models\UserRole;
+use Magein\Admin\Models\UserSetting;
 use Magein\Common\BaseService;
 
 class SystemService extends BaseService
@@ -15,14 +15,14 @@ class SystemService extends BaseService
      */
     public function getUserSetting($user_id)
     {
-        $record = SystemUserSetting::where('user_id', $user_id)->first();
+        $record = UserSetting::where('user_id', $user_id)->first();
 
         if (empty($record)) {
             return [];
         }
 
         if ($record->path) {
-            $record->auth = SystemAuth::whereIn('path', $record->path)->get();
+            $record->auth = SystemPermission::whereIn('path', $record->path)->get();
         } else {
             $record->auth = [];
         }
@@ -55,12 +55,12 @@ class SystemService extends BaseService
             return false;
         }
         list($user_id, $auth_id) = $params;
-        $paths = SystemAuth::whereIn('id', $auth_id)->pluck('path')->toArray();
+        $paths = SystemPermission::whereIn('id', $auth_id)->pluck('path')->toArray();
         if (empty($paths)) {
             return false;
         }
         foreach ($user_id as $uuid) {
-            $userSetting = SystemUserSetting::where('user_id', $uuid)->first();
+            $userSetting = UserSetting::where('user_id', $uuid)->first();
             $path = $userSetting->path ?: [];
             $userSetting->path = array_merge($path, $paths);
             $userSetting->save();
@@ -85,7 +85,7 @@ class SystemService extends BaseService
 
         CacheService::instance()->userAuthPaths($user_id, true);
 
-        return SystemUserSetting::updateOrCreate(['user_id' => $user_id], ['path' => $paths]);
+        return UserSetting::updateOrCreate(['user_id' => $user_id], ['path' => $paths]);
     }
 
     /**
@@ -101,7 +101,7 @@ class SystemService extends BaseService
         }
 
         // 获取角色下的权限路径
-        $role_paths = SystemRole::whereIn('id', $role_id)->pluck('path')->toArray();
+        $role_paths = UserRole::whereIn('id', $role_id)->pluck('path')->toArray();
         $paths = [];
         if ($role_paths) {
             foreach ($role_paths as $item) {
@@ -109,13 +109,13 @@ class SystemService extends BaseService
             }
         }
 
-        $setting = SystemUserSetting::where('user_id', intval($user_id))->first();
+        $setting = UserSetting::where('user_id', intval($user_id))->first();
 
         if ($setting) {
             $paths = array_merge($setting->path, $paths);
         }
 
-        return SystemUserSetting::updateOrCreate(['user_id' => intval($user_id)], ['role_id' => $role_id, 'path' => $paths]);
+        return UserSetting::updateOrCreate(['user_id' => intval($user_id)], ['role_id' => $role_id, 'path' => $paths]);
     }
 
     /**
@@ -134,14 +134,14 @@ class SystemService extends BaseService
 
         list($role_id, $auth_id) = $params;
 
-        $paths = SystemAuth::whereIn('id', $auth_id)->pluck('path');
+        $paths = SystemPermission::whereIn('id', $auth_id)->pluck('path');
         if (empty($paths)) {
             return false;
         }
 
         $paths = $paths->toArray();
         foreach ($role_id as $item) {
-            $role = SystemRole::find($item);
+            $role = UserRole::find($item);
             if ($role) {
                 $role_path = array_merge($role->path, $paths);
                 $role->path = $role_path;
@@ -149,7 +149,7 @@ class SystemService extends BaseService
             }
         }
 
-        $userSetting = SystemUserSetting::all();
+        $userSetting = UserSetting::all();
         if ($userSetting->isEmpty()) {
             return true;
         }
@@ -166,7 +166,7 @@ class SystemService extends BaseService
                 $user_paths = array_merge($user_paths, $paths);
             }
             $user_paths = array_unique($user_paths);
-            SystemUserSetting::updateOrCreate(['user_id' => $user->user_id], ['path' => $user_paths]);
+            UserSetting::updateOrCreate(['user_id' => $user->user_id], ['path' => $user_paths]);
         }
 
         return true;

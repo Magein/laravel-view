@@ -2,11 +2,11 @@
 
 namespace Magein\Admin\View;
 
-use Magein\Admin\Models\SystemUserAction;
-use Magein\Admin\Models\SystemUserSetting;
-use Magein\Admin\View\Page\SystemAuthPage;
-use Magein\Admin\View\Page\SystemRolePage;
+use Magein\Admin\Models\UserAction;
+use Magein\Admin\Models\UserSetting;
+use Magein\Admin\View\Page\SystemPermissionPage;
 use Magein\Admin\View\Page\UserPage;
+use Magein\Admin\View\Page\UserRolePage;
 use magein\tools\common\Variable;
 
 class PageMapping
@@ -48,10 +48,10 @@ class PageMapping
     {
         $data = [
             'User' => new UserPage(),
-            'SystemRole' => new SystemRolePage(),
-            'SystemAuth' => new SystemAuthPage(),
-            'SystemUserAction' => SystemUserAction::class,
-            'SystemUserSetting' => SystemUserSetting::class,
+            'UserRole' => new UserRolePage(),
+            'UserAction' => UserAction::class,
+            'UserSetting' => UserSetting::class,
+            'SystemPermission' => new SystemPermissionPage(),
         ];
 
         return $data[$name] ?? null;

@@ -2,12 +2,12 @@
 
 namespace Magein\Admin\View\Page;
 
-use Magein\Admin\Models\SystemRole;
+use Magein\Admin\Models\UserRole;
 use Magein\Admin\View\Page;
 
-class SystemRolePage extends Page
+class UserRolePage extends Page
 {
-    public $model = SystemRole::class;
+    public $model = UserRole::class;
 
     public $auth = '用户角色';
 
@@ -44,5 +44,7 @@ class SystemRolePage extends Page
         'group',
         'name'
     ];
+
+    public $columns = 'name';
 }
 

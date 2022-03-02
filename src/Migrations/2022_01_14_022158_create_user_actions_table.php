@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateSystemUserActionsTable extends Migration
+class CreateUserActionsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateSystemUserActionsTable extends Migration
      */
     public function up()
     {
-        Schema::create('system_user_actions', function (Blueprint $table) {
+        Schema::create('user_actions', function (Blueprint $table) {
             $table->id();
             $table->string('user_id', 30)->comment('用户标识');
             $table->string('path', 60)->comment('请求路径');
@@ -24,6 +24,8 @@ class CreateSystemUserActionsTable extends Migration
             $table->timestamps();
             $table->softDeletes();
         });
+
+        \Illuminate\Support\Facades\DB::statement("ALTER TABLE `user_actions` comment '用户行为日志表'");
     }
 
     /**

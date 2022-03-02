@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateSystemAuthsTable extends Migration
+class CreateSystemPermissionsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateSystemAuthsTable extends Migration
      */
     public function up()
     {
-        Schema::create('system_auths', function (Blueprint $table) {
+        Schema::create('system_permissions', function (Blueprint $table) {
             $table->id();
             $table->string('group', 30)->comment('所属分组');
             $table->string('name', 30)->comment('权限名称');
@@ -22,6 +22,8 @@ class CreateSystemAuthsTable extends Migration
             $table->timestamps();
             $table->softDeletes();
         });
+
+        \Illuminate\Support\Facades\DB::statement("ALTER TABLE `system_permissions` comment '权限表'");
     }
 
     /**
