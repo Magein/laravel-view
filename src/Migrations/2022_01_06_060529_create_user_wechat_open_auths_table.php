@@ -31,7 +31,7 @@ class CreateUserWeChatOpenAuthsTable extends Migration
             $table->softDeletes();
         });
 
-        \Illuminate\Support\Facades\DB::statement("ALTER TABLE `user_wechat_auths` comment '用户微信授权表'");
+        \Illuminate\Support\Facades\DB::statement("ALTER TABLE `user_wechat_open_auths` comment '用户微信授权表'");
     }
 
     /**
