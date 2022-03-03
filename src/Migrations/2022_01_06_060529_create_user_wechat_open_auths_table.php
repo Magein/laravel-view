@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateUserWeChatAuthsTable extends Migration
+class CreateUserWeChatOpenAuthsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateUserWeChatAuthsTable extends Migration
      */
     public function up()
     {
-        Schema::create('user_wechat_auths', function (Blueprint $table) {
+        Schema::create('user_wechat_open_auths', function (Blueprint $table) {
             $table->id();
             $table->integer('user_id')->comment('会员ID')->default(0);
             $table->char('uuid', 32)->unique()->comment('授权标识 接口中不能暴露用户的open_id');
