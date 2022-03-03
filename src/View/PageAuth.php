@@ -38,6 +38,7 @@ class PageAuth
         'delete' => '删除',
         'restore' => '恢复',
         'clean' => '清除',
+        'download' => '下载',
     ];
 
     public function __construct($group = '', string $name = '', $list = [])

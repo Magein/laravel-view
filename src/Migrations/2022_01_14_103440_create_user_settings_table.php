@@ -17,8 +17,8 @@ class CreateUserSettingsTable extends Migration
             $table->id();
             $table->string('user_id', 30)->unique()->comment('用户标识');
             $table->string('role_id')->comment('所属角色')->default('');
-            $table->string('permission_id')->comment('拥有权限');
-            $table->text('theme')->comment('主题设置');
+            $table->text('permission_id')->comment('拥有权限');
+            $table->text('theme')->comment('主题设置')->default('');
             $table->timestamps();
             $table->softDeletes();
         });

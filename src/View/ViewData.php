@@ -61,7 +61,7 @@ class ViewData
 
         // 验证权限
         if (!$page->auth()->verify($this->name, $this->action)) {
-            return ApiResponse::error('尚未获得请求权限', ViewErrorCode::PAGE_FORBID);
+            return ApiResponse::error('尚未获得 ' . $this->name . '/' . $this->action . '的请求权限', ViewErrorCode::PAGE_FORBID);
         }
 
         try {

@@ -44,7 +44,7 @@ class System extends BaseController
     {
         $user_id = $request::input('user_id');
 
-        return ApiResponse::auto(SystemService::instance()->getUserSetting($user_id));
+        return ApiResponse::auto(SystemService::instance()->getUserSetting($user_id, true));
     }
 
     /**
@@ -53,12 +53,12 @@ class System extends BaseController
      * @param Request $request
      * @return ResponseFactory|Response
      */
-    public function setUserAuth(Request $request)
+    public function setUserPermission(Request $request)
     {
         $user_id = $request::input('user_id');
-        $auth_id = $request::input('auth_id');
+        $permission_id = $request::input('permission_id');
 
-        return ApiResponse::auto(SystemService::instance()->setUserAuth($user_id, $auth_id));
+        return ApiResponse::auto(SystemService::instance()->setUserPermission($user_id, $permission_id));
     }
 
     /**
@@ -67,12 +67,12 @@ class System extends BaseController
      * @param Request $request
      * @return ResponseFactory|Response
      */
-    public function removeUserAuth(Request $request)
+    public function removeUserPermission(Request $request)
     {
         $user_id = $request::input('user_id');
-        $paths = $request::input('paths');
+        $permission_id = $request::input('permission_id');
 
-        return ApiResponse::auto(SystemService::instance()->removeUserAuth($user_id, $paths));
+        return ApiResponse::auto(SystemService::instance()->removeUserPermission($user_id, $permission_id));
     }
 
     /**
@@ -81,11 +81,19 @@ class System extends BaseController
      * @param Request $request
      * @return ResponseFactory|Response
      */
-    public function setRoleAuth(Request $request)
+    public function setRolePermission(Request $request)
     {
         $role_id = $request::input('role_id');
-        $auth_id = $request::input('auth_id');
+        $permission_id = $request::input('permission_id');
 
-        return ApiResponse::auto(SystemService::instance()->setRoleAuth($role_id, $auth_id));
+        return ApiResponse::auto(SystemService::instance()->setRolePermission($role_id, $permission_id));
+    }
+
+    public function removeRolePermission(Request $request)
+    {
+        $role_id = $request::input('role_id');
+        $permission_id = $request::input('permission_id');
+
+        return ApiResponse::auto(SystemService::instance()->removeRolePermission($role_id, $permission_id));
     }
 }

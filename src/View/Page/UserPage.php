@@ -3,6 +3,7 @@
 namespace Magein\Admin\View\Page;
 
 use Magein\Admin\Models\User;
+use Magein\Admin\Models\UserSetting;
 use Magein\Admin\Service\SystemService;
 use Magein\Admin\View\Page;
 
@@ -50,11 +51,16 @@ class UserPage extends Page
 
     public function complete($result, $action)
     {
-        if ($result && ($action == 'create' || $action == 'edit')) {
-            $user_id = request()->input('id');
-            $role_id = request()->input('role_id');
-            if ($user_id && $role_id) {
-                SystemService::instance()->setUserRole($user_id, $role_id);
+        if ($result) {
+            if ($action == 'create' || $action == 'edit') {
+                $user_id = request()->input('id');
+                $role_id = request()->input('role_id');
+                if ($user_id && $role_id) {
+                    SystemService::instance()->setUserRole($user_id, $role_id);
+                }
+            } elseif ($action == 'get') {
+                $setting = SystemService::instance()->getUserSetting($result->id);
+                $result->role_id = $setting['role_id'] ?? [];
             }
         }
 

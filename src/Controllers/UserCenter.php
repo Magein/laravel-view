@@ -2,6 +2,7 @@
 
 namespace Magein\Admin\Controllers;
 
+use Illuminate\Support\Facades\Auth;
 use Magein\Admin\Service\CacheService;
 use Magein\Admin\Service\UserService;
 use Magein\Common\ApiResponse;
@@ -15,7 +16,7 @@ class UserCenter
     public function logout(Request $request)
     {
         if ($request::user()) {
-            CacheService::instance()->userAuthPaths($request::user()->id,true);
+            CacheService::instance()->userAuthPaths($request::user()->id, true);
             $request::user()->currentAccessToken()->delete();
         }
 
@@ -47,5 +48,14 @@ class UserCenter
         $confirm = $request::input('confirm');
 
         return ApiResponse::auto(UserService::instance()->setPassword($password, $new, $confirm));
+    }
+
+    public function updatePermission(Request $request)
+    {
+        CacheService::instance()->userAuthPaths(Auth::id(), true);
+
+        CacheService::instance()->userAuthPaths(Auth::id());
+
+        return ApiResponse::success([Auth::id()]);
     }
 }

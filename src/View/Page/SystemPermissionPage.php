@@ -4,18 +4,13 @@ namespace Magein\Admin\View\Page;
 
 use Magein\Admin\Models\SystemPermission;
 use Magein\Admin\View\Page;
+use magein\tools\common\Variable;
 
 class SystemPermissionPage extends Page
 {
     public $model = SystemPermission::class;
 
     public $auth = '权限';
-
-    public $search = [
-        'group',
-        ['name', 'like'],
-        'path'
-    ];
 
     public $rules = [
         'group' => 'bail|required|string|max:30',
@@ -41,5 +36,19 @@ class SystemPermissionPage extends Page
         'description.string' => '权限描述需要一个字符串',
         'description.max' => '权限描述最大长度为140',
     ];
+
+    public $search = [
+        'group',
+        ['name', 'like'],
+    ];
+
+    public function search(array $params = []): array
+    {
+        $path = request()->input('path');
+        if ($path) {
+            $params[] = ['path', '=', Variable::instance()->pascal($path)];
+        }
+        return parent::search($params);
+    }
 }
 

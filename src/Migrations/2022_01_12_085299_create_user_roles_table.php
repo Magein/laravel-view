@@ -18,7 +18,7 @@ class CreateUserRolesTable extends Migration
             $table->string('group', 30)->comment('角色组');
             $table->string('name', 30)->comment('角色名称');
             $table->string('description', 140)->default('')->comment('角色描述');
-            $table->string('permission_id', 800)->default('')->comment('权限ID');
+            $table->text('permission_id')->comment('权限ID');
             $table->tinyInteger('sort')->default(99)->comment('排序');
             $table->timestamps();
             $table->softDeletes();

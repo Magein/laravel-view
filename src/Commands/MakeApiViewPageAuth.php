@@ -91,7 +91,7 @@ class MakeApiViewPageAuth extends Command
         }
 
         if ($supper) {
-            $this->createAuth();
+            $this->createPermission();
         }
     }
 
@@ -271,16 +271,16 @@ class MakeApiViewPageAuth extends Command
         $this->info($auth->name . ' ' . $auth->path . ' 插入成功');
     }
 
-    public function createAuth()
+    public function createPermission()
     {
-        $paths = SystemPermission::pluck('path')->toArray();
-        if (!$paths) {
-            $this->error('请先生成权限路径');
+        $permission_ids = SystemPermission::pluck('id')->toArray();
+        if (!$permission_ids) {
+            $this->error('请先生成权限路径:php artisan --page');
             exit();
         }
         $user = User::where('id', 1)->first();
-        if ($paths && ($user->id ?? 0)) {
-            UserSetting::updateOrCreate(['user_id' => $user->id], ['path' => $paths]);
+        if (($user->id ?? 0)) {
+            UserSetting::updateOrCreate(['user_id' => $user->id], ['permission_id' => $permission_ids]);
             $this->info('设置超级管理员权限成功');
         } else {
             $this->createUser();

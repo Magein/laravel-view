@@ -2,7 +2,9 @@
 
 namespace Magein\Admin\View\Page;
 
+use Magein\Admin\Models\SystemPermission;
 use Magein\Admin\Models\UserRole;
+use Magein\Admin\Service\SystemService;
 use Magein\Admin\View\Page;
 
 class UserRolePage extends Page
@@ -46,5 +48,16 @@ class UserRolePage extends Page
     ];
 
     public $columns = 'name';
+
+    public function complete($result, $action)
+    {
+        if ($result) {
+            if ($action == 'get' && $result->permission_id) {
+                $result->permission = SystemPermission::whereIn('id', $result->permission_id)->get();
+            }
+        }
+
+        return parent::complete($result, $action);
+    }
 }
 

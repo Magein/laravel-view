@@ -245,7 +245,6 @@ class Page
     /**
      * @return string[]
      */
-
     public function update(): array
     {
         return [

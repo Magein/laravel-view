@@ -31,7 +31,7 @@ use Illuminate\Foundation\Auth\Access\Authorizable;
  * @property string $updated_at
  * @property string $deleted_at
  */
-class User extends BaseModel implements AuthenticatableContract,AuthorizableContract,CanResetPasswordContract
+class User extends BaseModel implements AuthenticatableContract, AuthorizableContract, CanResetPasswordContract
 {
     use HasApiTokens;
     use Authenticatable;
@@ -72,7 +72,9 @@ class User extends BaseModel implements AuthenticatableContract,AuthorizableCont
      *
      * @var array
      */
-    protected $casts = [];
+    protected $casts = [
+        'status' => 'int',
+    ];
 
     public static function booted()
     {

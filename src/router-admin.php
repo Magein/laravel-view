@@ -23,16 +23,20 @@ Route::prefix('admin')->group(function () {
             Route::get('getUserInfo', [UserCenter::class, 'getInfo']);
             Route::post('setUserInfo', [UserCenter::class, 'setUserInfo']);
             Route::post('setPassword', [UserCenter::class, 'setPassword']);
+            Route::get('updatePermission', [UserCenter::class, 'updatePermission']);
         });
         /**
          * 系统设置，如分配权限等
          */
         Route::prefix('system')->group(function () {
             Route::post('getUserSetting', [System::class, 'getUserSetting']);
-            Route::post('setUserAuth', [System::class, 'setUserAuth']);
-            Route::post('removeUserAuth', [System::class, 'removeUserAuth']);
-            Route::post('setUserRole', [System::class, 'setUserRole']);
-            Route::post('setRoleAuth', [System::class, 'setRoleAuth']);
+
+            Route::post('setUserPermission', [System::class, 'setUserPermission']);
+            Route::post('removeUserPermission', [System::class, 'removeUserPermission']);
+
+            Route::post('setRolePermission', [System::class, 'setRolePermission']);
+            Route::post('removeRolePermission', [System::class, 'removeRolePermission']);
+
         });
     });
 });
