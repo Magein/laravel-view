@@ -273,19 +273,26 @@ class MakeApiViewPageAuth extends Command
 
     public function createPermission()
     {
+        $init = function ($permission_ids, $id, $role_name) {
+            if (!$permission_ids) {
+                $this->error('请先生成权限路径:php artisan --page');
+                exit();
+            }
+            if (empty($id)) {
+                $this->error('请先生成用户:php artisan --user');
+                exit();
+            }
+            UserSetting::updateOrCreate(['user_id' => $id], ['permission_id' => $permission_ids]);
+            $this->info('创建' . $role_name . '用户权限成功');
+        };
+
         $permission_ids = SystemPermission::pluck('id')->toArray();
-        if (!$permission_ids) {
-            $this->error('请先生成权限路径:php artisan --page');
-            exit();
-        }
         $user = User::where('id', 1)->first();
-        if (($user->id ?? 0)) {
-            UserSetting::updateOrCreate(['user_id' => $user->id], ['permission_id' => $permission_ids]);
-            $this->info('设置超级管理员权限成功');
-        } else {
-            $this->createUser();
-            $this->error('error: 请先创建用户！你可以执行php artisan --all user');
-        }
+        $init($permission_ids, $user->id ?? 0, '超级管理员');
+        
+        $permission_ids = SystemPermission::where('group', '<>', 'system')->pluck('id')->toArray();
+        $user = User::where('id', 2)->first();
+        $init($permission_ids, $user->id ?? 0, '普通管理员');
     }
 
     private function createUser()
@@ -296,6 +303,7 @@ class MakeApiViewPageAuth extends Command
             ['admin', '普通管理员', '除系统管理权限外的其他所有权限'],
             ['user', '普通用户', '普通用户'],
         ];
+
         foreach ($roles as $item) {
             $group = $item[0];
             $name = $item[1];

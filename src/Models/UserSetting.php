@@ -33,38 +33,19 @@ class UserSetting extends BaseModel
             if (empty($model->permission_id)) {
                 $model->permission_id = [];
             }
+            if (empty($model->role_id)) {
+                $model->role_id = [];
+            }
         });
     }
 
     public function setRoleIdAttribute($value)
     {
-        if (is_array($value)) {
-            $value = array_filter($value);
-            $value = array_unique($value);
-            $value = $value ? array_reduce($value, function ($value, $item) {
-                $value[] = intval($item);
-                return $value;
-            }) : [];
-        } else {
-            $value = [];
-        }
-
-        $this->attributes['role_id'] = $value;
+        $this->attributes['role_id'] = $this->asIntJson($value);
     }
 
     public function setPermissionIdAttribute($value)
     {
-        if (is_array($value)) {
-            $value = array_filter($value);
-            $value = array_unique($value);
-            $value = array_reduce($value, function ($value, $item) {
-                $value[] = intval($item);
-                return $value;
-            });
-        } else {
-            $value = [];
-        }
-
-        $this->attributes['permission_id'] = $value;
+        $this->attributes['permission_id'] = $this->asIntJson($value);
     }
 }
