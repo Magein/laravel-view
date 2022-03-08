@@ -30,6 +30,9 @@ use Illuminate\Foundation\Auth\Access\Authorizable;
  * @property string $created_at
  * @property string $updated_at
  * @property string $deleted_at
+ *
+ * @method static _email($email)
+ * @method static _phone($phone)
  */
 class User extends BaseModel implements AuthenticatableContract, AuthorizableContract, CanResetPasswordContract
 {

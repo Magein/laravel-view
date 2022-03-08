@@ -19,6 +19,8 @@ Route::prefix('admin')->group(function () {
          * 个人中心 设置个人信息，修改密码，上传头像等等
          */
         Route::prefix('uc')->group(function () {
+            // 二维码登录，绑定token和用户信息
+            Route::post('setQrcodeToken', [UserCenter::class, 'setQrcodeToken']);
             Route::get('logout', [UserCenter::class, 'logout']);
             Route::get('getUserInfo', [UserCenter::class, 'getInfo']);
             Route::post('setUserInfo', [UserCenter::class, 'setUserInfo']);

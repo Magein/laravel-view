@@ -18,15 +18,19 @@ class User extends BaseController
         return ApiResponse::auto(UserService::instance()->login($email, $password));
     }
 
-    public function loginByPhone()
+    public function loginByPhone(Request $request)
     {
+        $phone = $request::input('phone');
+        $code = $request::input('code');
 
+        return ApiResponse::auto(UserService::instance()->loginByPhone($phone, $code));
     }
 
-
-    public function loginByQrcode()
+    public function loginByQrcode(Request $request)
     {
+        $token = $request::input('token');
 
+        return ApiResponse::auto(UserService::instance()->loginByQrcode($token));
     }
 
     public function findPass()

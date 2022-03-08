@@ -9,6 +9,8 @@ use Magein\Common\BaseModel;
  * @property string $permission_id
  * @property integer $role_id
  * @property string $theme
+ *
+ * @method static _userId($user_id);
  */
 class UserSetting extends BaseModel
 {

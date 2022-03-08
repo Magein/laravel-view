@@ -2,6 +2,8 @@
 
 namespace Magein\Admin\Controllers;
 
+use Illuminate\Contracts\Routing\ResponseFactory;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Magein\Admin\Service\CacheService;
 use Magein\Admin\Service\UserService;
@@ -21,6 +23,15 @@ class UserCenter
         }
 
         return ApiResponse::success('success');
+    }
+
+    /**
+     * @param Request $request
+     * @return ResponseFactory|Response
+     */
+    public function setQrcodeToken(Request $request)
+    {
+        return ApiResponse::success(CacheService::instance()->setQrcodeToken($request::user()->id, $request::input('token')));
     }
 
     /**

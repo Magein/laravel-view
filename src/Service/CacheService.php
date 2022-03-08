@@ -5,6 +5,7 @@ namespace Magein\Admin\Service;
 use Illuminate\Contracts\Cache\Repository;
 use Magein\Admin\Models\SystemPermission;
 use Magein\Common\BaseService;
+use Magein\Common\MsgContainer;
 use Magein\Common\RedisCache;
 
 class CacheService extends BaseService
@@ -31,5 +32,16 @@ class CacheService extends BaseService
             $paths && $this->drive()->put($key, $paths);
         }
         return $paths;
+    }
+
+    public function setQrcodeToken($user_id, $token)
+    {
+        if (empty($token) || empty($user_id)) {
+            return MsgContainer::msg('参数错误');
+        }
+
+        RedisCache::put($token, $user_id, 300);
+
+        return true;
     }
 }

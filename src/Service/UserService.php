@@ -1,6 +1,7 @@
 <?php
 
 namespace Magein\Admin\Service;
+
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\Validator;
 use Magein\Admin\Models\User;
@@ -8,6 +9,9 @@ use Magein\Admin\View\Page\UserPage;
 use Magein\Common\BaseService;
 use Magein\Common\MsgContainer;
 use Illuminate\Support\Facades\Hash;
+use Magein\Common\RedisCache;
+use Magein\Sms\Facades\Sms;
+use Magein\Sms\Lib\SmsCode;
 
 class UserService extends BaseService
 {
@@ -71,17 +75,10 @@ class UserService extends BaseService
         return $user->save();
     }
 
-    /**
-     * @param $email
-     * @param $password
-     * @return MsgContainer|null[]
-     */
-    public function login($email, $password)
+    private function loginAfter($user)
     {
-        $user = User::where(['email' => $email])->first();
-
-        if (empty($user) || !Hash::check($password, $user->password)) {
-            return $this->error('用户不存在');
+        if ($user->status == 0) {
+            return $this->error('用户已经被禁止登录');
         }
 
         // 设置请求权限
@@ -94,5 +91,58 @@ class UserService extends BaseService
         return [
             'token' => $user->createToken('user' . $user->id)->plainTextToken,
         ];
+    }
+
+    /**
+     * @param $email
+     * @param $password
+     * @return MsgContainer|null[]
+     */
+    public function login($email, $password)
+    {
+        $user = User::_email($email);
+
+        if (empty($user) || !Hash::check($password, $user->password)) {
+            return $this->error('用户不存在');
+        }
+
+        return $this->loginAfter($user);
+    }
+
+    /**
+     * @param $phone
+     * @param $password
+     * @return MsgContainer|null[]
+     */
+    public function loginByPhone($phone, $code)
+    {
+        $user = User::_phone($phone);
+
+        if (empty($user)) {
+            return $this->error('用户不存在');
+        }
+
+        if (Sms::validate($phone, $code, SmsCode::SCENE_LOGIN)->fail()) {
+            return $this->error('验证码不正确');
+        }
+
+        return $this->loginAfter($user);
+    }
+
+    /**
+     * @param $token
+     * @return array|MsgContainer
+     */
+    public function loginByQrcode($token)
+    {
+        $user_id = RedisCache::get($token);
+        if (empty($user_id)) {
+            return $this->error('无效的token');
+        }
+        $user = User::find($user_id);
+        if (empty($user_id)) {
+            return $this->error('用户不存在');
+        }
+        return $this->loginAfter($user);
     }
 }

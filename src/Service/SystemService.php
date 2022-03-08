@@ -17,7 +17,8 @@ class SystemService extends BaseService
      */
     public function getUserSetting($user_id, $rel = false)
     {
-        $record = UserSetting::where('user_id', $user_id)->first();
+
+        $record = UserSetting::_userId($user_id);
 
         if (empty($record)) {
             return [];
