@@ -140,7 +140,7 @@ class UserService extends BaseService
             return $this->error('无效的token');
         }
         $user = User::find($user_id);
-        if (empty($user_id)) {
+        if (empty($user)) {
             return $this->error('用户不存在');
         }
         return $this->loginAfter($user);
