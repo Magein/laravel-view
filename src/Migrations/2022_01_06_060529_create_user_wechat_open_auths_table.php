@@ -41,6 +41,6 @@ class CreateUserWeChatOpenAuthsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('user_auths');
+        Schema::dropIfExists('user_wechat_open_auths');
     }
 }
