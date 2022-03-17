@@ -12,5 +12,6 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::get('vue', function () {
-    echo (new \Magein\Admin\View\PageMake())->vue();
+    echo '<pre/>';
+    echo htmlspecialchars((new \Magein\Admin\View\PageMake())->vue());
 });

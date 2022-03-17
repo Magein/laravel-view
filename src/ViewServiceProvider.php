@@ -15,7 +15,7 @@ class ViewServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->mergeConfigFrom(__DIR__ . '/config.php', 'view');
+        $this->mergeConfigFrom(__DIR__ . '/Config.php', 'view');
     }
 
     /**
@@ -26,11 +26,11 @@ class ViewServiceProvider extends ServiceProvider
     public function boot()
     {
         // 注册admin路由
-        $path = __DIR__ . '/router-admin.php';
+        $path = __DIR__ . '/RouterAdmin.php';
         $this->loadRoutesFrom($path);
 
         // 注册视图路由
-        $path = __DIR__ . '/router-view.php';
+        $path = __DIR__ . '/RouterView.php';
         $this->loadRoutesFrom($path);
 
         // 加载数据库迁移文件
