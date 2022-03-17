@@ -49,10 +49,7 @@ class PageMake
             }
 
             if ($comment) {
-                $dictionary[$field] = [
-                    'text' => $comment[0] ?? '',
-                    'desc' => $comment[1] ?? '',
-                ];
+                $dictionary[$field] = $comment[0];
             }
 
             if ($field === 'status') {
@@ -108,6 +105,7 @@ class PageMake
                     }
                     return true;
                 });
+
                 // 剔除掉第一个的描述信息
                 $comment = array_slice($comment, 1);
                 // 没三个切割为一个数组
@@ -115,15 +113,16 @@ class PageMake
                 if (empty($comment)) {
                     continue;
                 }
-
                 if ($key > 0) {
                     $const_string .= '          ';
                 }
                 $const_string .= 'const ' . $item['field'] . ' = ';
                 $const_string .= '{';
                 foreach ($comment as $com) {
-                    $const_string .= "{$com[0]}:'{$com[1]}',";
-                }
+                    if (count($com) == 3) {
+                        $const_string .= "{$com[0]}:'{$com[1]}',";
+                    }
+                };
                 $const_string = trim($const_string, ',');
                 $const_string .= "};\n";
             }

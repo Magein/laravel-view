@@ -9,11 +9,11 @@ class pageName extends Page
 {
     public $model = Model::class;
 
-    public $auth = [];
+    public $auth = null;
 
     public $search = [];
 
-    public $rules = '';
+    public $rules = RULES;
 
-    public $message = '';
+    public $message = MESSAGE;
 }

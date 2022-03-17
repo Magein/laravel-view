@@ -179,13 +179,17 @@ class MakeApiViewPage extends Command
             '/useModel/',
             '/Model::class/',
             '/pageName/',
+            '/RULES/',
+            '/MESSAGE/'
         ];
 
         $replace = [
             $page_path,
             $use_model,
             "$model::class",
-            pathinfo($page_name, PATHINFO_FILENAME)
+            pathinfo($page_name, PATHINFO_FILENAME),
+            $validate_rules,
+            $validate_message
         ];
 
         $content = preg_replace($search, $replace, $template);
