@@ -128,7 +128,7 @@ class PageMake
             }
         }
 
-        $header .= "'operation|action|180'";
+        $header .= "'operation|action|w|180'";
         $header = trim($header, ',');
         $form = trim($form, ',');
         $search = trim($search, ',');
