@@ -19,7 +19,8 @@
     "laravel/framework": "~8.54",
     "laravel/sanctum": "~2.14",
     "magein/tools": "dev-master",
-    "magein/laravel-common": "*@dev"
+    "magein/laravel-common": "*@dev",
+    "magein/laravel-upload": "*@dev"
   },
   "autoload": {
     "psr-4": {

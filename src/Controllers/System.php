@@ -10,6 +10,7 @@ use Magein\Common\ApiResponse;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Request;
 use Magein\Common\Upload\Driver\UploadLocal;
+use Magein\Upload\Facades\Upload;
 
 class System extends BaseController
 {
@@ -30,8 +31,7 @@ class System extends BaseController
      */
     public function upload(\Illuminate\Http\Request $request)
     {
-        $upload = new UploadLocal($request->file('file'));
-        return ApiResponse::auto($upload->move());
+        return ApiResponse::auto(Upload::store());
     }
 
     /**

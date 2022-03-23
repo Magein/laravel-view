@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c367ff43a01d547304f0797592447e6c",
+    "content-hash": "813354a8deb7f9389fc6bccfff8d10f1",
     "packages": [
         {
             "name": "brick/math",
@@ -1268,6 +1268,54 @@
                 "source": "https://github.com/Magein/laravel-tools/tree/master"
             },
             "time": "2022-01-21T06:21:34+00:00"
+        },
+        {
+            "name": "magein/laravel-upload",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Magein/laravel-upload.git",
+                "reference": "1f587f1dd6c0be7be2d418329fb97e2b92f98c1b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Magein/laravel-upload/zipball/1f587f1dd6c0be7be2d418329fb97e2b92f98c1b",
+                "reference": "1f587f1dd6c0be7be2d418329fb97e2b92f98c1b",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "laravel/framework": "~8.54",
+                "php": "^7.4|^8.0"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Magein\\Upload\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "magein",
+                    "homepage": "https://github.com/magein"
+                }
+            ],
+            "description": "laravel常用的工具类",
+            "homepage": "https://github.com/magein/laravel-upload",
+            "keywords": [
+                "laravel",
+                "tools"
+            ],
+            "support": {
+                "issues": "https://github.com/Magein/laravel-upload/issues",
+                "source": "https://github.com/Magein/laravel-upload/tree/master"
+            },
+            "time": "2022-03-23T06:52:13+00:00"
         },
         {
             "name": "magein/tools",
@@ -4982,7 +5030,8 @@
     "minimum-stability": "stable",
     "stability-flags": {
         "magein/tools": 20,
-        "magein/laravel-common": 20
+        "magein/laravel-common": 20,
+        "magein/laravel-upload": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,
