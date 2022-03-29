@@ -64,7 +64,7 @@ class PageAuth
         }
 
         $page_auth = config('view.page_auth');
-        if ($page_auth === false) {
+        if ($page_auth === false || $action === 'tree' || $action == 'columns') {
             $this->action();
             return true;
         }

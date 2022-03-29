@@ -68,6 +68,12 @@ class Page
     public $fields = [];
 
     /**
+     * 数据结构的字段
+     * @var array
+     */
+    public $tree = [];
+
+    /**
      * @param string $model
      */
 
@@ -148,7 +154,6 @@ class Page
     /**
      * @return array
      */
-
     public function message(): array
     {
         return $this->message;
@@ -161,6 +166,43 @@ class Page
             return [];
         }
         return (new $model())->limit(200)->pluck($this->columns, 'id')->toArray();
+    }
+
+    protected function getTree($page_size = 15, $parend_id = 0, &$result = [])
+    {
+        $model = $this->model;
+        $model = new $model();
+        if ($parend_id == 0) {
+            $records = $model->where('parent_id', $parend_id)->paginate($page_size);
+        } else {
+            $records = $model->where('parent_id', $parend_id)->get();
+        }
+
+        if ($records->isNotEmpty()) {
+            foreach ($records as $key => $item) {
+                $result[$item['id']] = $item->toArray();
+                $this->getTree($page_size, $item['id'], $result);
+            }
+        }
+        return $result;
+    }
+
+    public function tree($page_size = 15)
+    {
+        $data = $this->getTree($page_size);
+        $result = [];
+        if ($data) {
+            foreach ($data as $key => $item) {
+                $id = $item['id'];
+                $parent_id = $item['parent_id'];
+                if (isset($data[$parent_id])) {
+                    $data[$parent_id]['children'][] = &$data[$key];
+                } else {
+                    $result[] = &$data[$key];
+                }
+            }
+        }
+        return $result;
     }
 
     /**

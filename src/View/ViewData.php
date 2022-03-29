@@ -88,21 +88,13 @@ class ViewData
     {
         $page_size = request()->input('page_size', 15);
         $trash = request()->input('_trash', 0);
-        $column = request()->input('_column', '');
-        if ($column) {
-            return self::$page->columns();
-        }
 
         $model = $this->express(self::$page->search());
-
         if ($trash) {
             $model = $model->onlyTrashed();
         }
-
         $paginator = $model->with(self::$page->with())->orderBy('id', 'desc')->paginate($page_size);
-
         $items = $paginator->items();
-
         if ($items && self::$page->append()) {
             foreach ($items as $key => $item) {
                 $item->append(self::$page->append());
@@ -116,6 +108,28 @@ class ViewData
             'total' => $paginator->total(),
             'items' => $items,
         ];
+    }
+
+    protected function tree()
+    {
+        $no_page = request()->input('no_page', 0);
+
+        $records = self::$page->tree();
+        if ($no_page) {
+            return $records;
+        }
+
+        return [
+            'current_page' => 1,
+            'per_page' => 0,
+            'total' => 0,
+            'items' => $records,
+        ];
+    }
+
+    protected function columns()
+    {
+        return self::$page->columns();
     }
 
     protected function get()
