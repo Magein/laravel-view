@@ -5,6 +5,7 @@ namespace Magein\Admin\View;
 use Magein\Common\ApiResponse;
 use Magein\Common\BaseModel;
 use Magein\Common\MsgContainer;
+use Magein\Common\Output;
 use magein\tools\common\UnixTime;
 
 class ViewData
@@ -73,8 +74,8 @@ class ViewData
 
         $action = $this->action;
         if (method_exists($this, $action)) {
-            $result = $this->$action();
-            return ApiResponse::auto($page->complete($result, $action));
+            $output = $this->$action();
+            return ApiResponse::auto($page->complete($output, $action));
         } else {
             return ApiResponse::error('不允许的行为', ViewErrorCode::PAGE_ACTION_FAIL);
         }
@@ -82,9 +83,9 @@ class ViewData
 
     /**
      * 获取数据列表
-     * @return array
+     * @return Output
      */
-    protected function list(): array
+    protected function list(): Output
     {
         $page_size = request()->input('page_size', 15);
         $trash = request()->input('_trash', 0);
@@ -102,29 +103,32 @@ class ViewData
             }
         }
 
-        return [
+        return Output::success([
             'current_page' => $paginator->currentPage(),
             'per_page' => $paginator->perPage(),
             'total' => $paginator->total(),
             'items' => $items,
-        ];
+        ]);
     }
 
-    protected function tree()
+    /**
+     * @return \Magein\Common\Output
+     */
+    protected function tree(): Output
     {
         $no_page = request()->input('no_page', 0);
 
         $records = self::$page->tree();
         if ($no_page) {
-            return $records;
+            return Output::success($records);
         }
 
-        return [
+        return Output::success([
             'current_page' => 1,
             'per_page' => 0,
             'total' => 0,
             'items' => $records,
-        ];
+        ]);
     }
 
     protected function columns()
@@ -132,12 +136,15 @@ class ViewData
         return self::$page->columns();
     }
 
-    protected function get()
+    /**
+     * @return \Magein\Common\Output
+     */
+    protected function get(): Output
     {
-        $id = request()->get('id');
+        $id = request()->input('id', 0);
 
         if (empty($id)) {
-            return new MsgContainer('查询参数错误');
+            return new Output('查询参数错误');
         }
 
         $record = self::$model->with(self::$page->with())->find($id);
@@ -146,22 +153,23 @@ class ViewData
             $record->append(self::$page->append());
         }
 
-        return $record;
+        return new Output($record);
     }
 
     /**
-     * @return int|bool|MsgContainer
+     * @return \Magein\Common\Output
      */
-    protected function create()
+    protected function create(): Output
     {
-        $data = self::$page->create();
+        $output = self::$page->create();
+        $data = $output->getData();
         if (empty($data) || !is_array($data)) {
-            return $data;
+            return $output;
         }
 
         foreach ($data as $key => $item) {
             if ($item === null) {
-                unset($data[$key]);
+                $data[$key] = '';
             }
         }
 
@@ -169,36 +177,42 @@ class ViewData
 
         try {
             $model->fill($data);
-            $result = $model->save();
+            $model->save();
         } catch (\Exception $exception) {
             if (preg_match('/1062 Duplicate entry/', $exception->getMessage())) {
-                return new MsgContainer('请不要重复新增', 23000);
+                $message = '请不要重复新增';
             } else {
-                return new MsgContainer('数据列新增失败', 23000, [
-                    'line' => $exception->getLine(),
-                    'file' => $exception->getFile(),
-                    'error' => $exception->getMessage()
-                ]);
+                $message = '数据列新增失败';
             }
+
+            (new ViewLog())->write([
+                'file' => $exception->getFile(),
+                'line' => $exception->getLine(),
+                'message' => $exception->getMessage(),
+            ]);
+
+            return Output::error($message, 23000);
         }
 
-        return $result ? $model->id : false;
+        return Output::success(($model->id ?? 0) ?: false);
     }
 
     /**
-     * @return int|bool|MsgContainer
+     * @return \Magein\Common\Output
      */
-    protected function edit()
+    protected function edit(): Output
     {
         $id = request()->input('id', 0);
 
         if (empty($id)) {
-            return new MsgContainer('数据更新异常:not found key');
+            return new Output('更新参数错误');
         }
 
-        $data = self::$page->edit();
+        $output = self::$page->edit();
+
+        $data = $output->getData();
         if (empty($data) || !is_array($data)) {
-            return $data;
+            return $output;
         }
 
         foreach ($data as $key => $item) {
@@ -209,81 +223,95 @@ class ViewData
 
         $model = self::$model->find($id);
         if (empty($model)) {
-            return new MsgContainer('数据列不存在，请刷新重试');
+            return new Output('数据列不存在，请刷新重试');
         }
 
         try {
             $model->fill($data);
             $result = $model->save();
         } catch (\Exception $exception) {
-            return new MsgContainer('数据列更新失败', 23000, [
-                'line' => $exception->getLine(),
+            $index = (new ViewLog())->write([
                 'file' => $exception->getFile(),
-                'error' => $exception->getMessage()
+                'line' => $exception->getLine(),
+                'message' => $exception->getMessage(),
             ]);
+            $message = '数据列更新失败';
+            if ($index) {
+                $message = $message . ':' . $index;
+            }
+            return Output::error($message, 23000);
         }
 
-        return $result ? $model->id : 0;
+        return Output::success($result ? $model->id : 0);
     }
 
     /**
-     * @return int|bool|MsgContainer
+     * @return \Magein\Common\Output
      */
-    protected function update()
+    protected function update(): Output
     {
         $id = request()->input('id', 0);
 
         if (empty($id)) {
-            return new MsgContainer('数据更新异常:not found key');
+            return new Output('更新参数错误');
         }
 
         $key = request()->input('key', '');
         $value = request()->input('value', '');
 
         if (!in_array($key, self::$page->update())) {
-            return new MsgContainer('不允许更新字段信息');
+            return new Output('不允许更新字段信息');
         }
 
         $model = self::$model->find($id);
         if (empty($model)) {
-            return new MsgContainer('数据列不存在，请刷新重试');
+            return new Output('数据列不存在，请刷新重试');
         }
 
         try {
             $model->$key = $value;
             $result = $model->save();
         } catch (\Exception $exception) {
-            return new MsgContainer('数据列更新失败', 23000, $exception->getMessage());
+            $index = (new ViewLog())->write([
+                'file' => $exception->getFile(),
+                'line' => $exception->getLine(),
+                'message' => $exception->getMessage(),
+            ]);
+            $message = '数据列更新失败';
+            if ($index) {
+                $message = $message . ':' . $index;
+            }
+            return Output::error($message, 23000);
         }
 
-        return $result ? $model->id : 0;
+        return Output::success($result ? $model->id : 0);
     }
 
     /**
      * 移动到回收站
-     * @return int|MsgContainer
+     * @return Output
      */
-    protected function delete()
+    protected function delete(): Output
     {
         $ids = request()->input('ids');
 
         if (empty($ids)) {
-            return new MsgContainer('添加到回收站失败');
+            return new Output('添加到回收站失败');
         }
 
-        return self::$model->destroy($ids);
+        return Output::success(self::$model->destroy($ids));
     }
 
     /**
      * 彻底删除
-     * @return int|MsgContainer
+     * @return int|Output
      */
     protected function clean(): int
     {
         $ids = request()->input('ids');
 
         if (empty($ids)) {
-            return new MsgContainer('数据删除失败');
+            return new Output('数据删除失败');
         }
 
         if (!is_array($ids)) {
@@ -300,19 +328,19 @@ class ViewData
             }
         }
 
-        return $number;
+        return Output::success($number);
     }
 
     /**
      * 恢复数据
-     * @return int|MsgContainer
+     * @return Output
      */
     protected function restore()
     {
         $ids = request()->input('ids');
 
         if (empty($ids)) {
-            return new MsgContainer('数据列不存在，请刷新重试');
+            return new Output('数据列不存在，请刷新重试');
         }
 
         if (!is_array($ids)) {
@@ -329,14 +357,13 @@ class ViewData
             }
         }
 
-        return $number;
+        return Output::success($number);
     }
 
     /**
      * @param array $search
-     * @return mixed
+     * @return \Magein\Common\BaseModel
      */
-
     public function express(array $search)
     {
         $params = request()->input();
@@ -349,7 +376,6 @@ class ViewData
         };
 
         $model = self::$model;
-
 
         foreach ($search as $item) {
             if (is_string($item)) {

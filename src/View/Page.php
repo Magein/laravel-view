@@ -2,8 +2,8 @@
 
 namespace Magein\Admin\View;
 
-use Magein\Common\MsgContainer;
 use Illuminate\Support\Facades\Validator;
+use Magein\Common\Output;
 
 class Page
 {
@@ -168,18 +168,18 @@ class Page
         return (new $model())->limit(200)->pluck($this->columns, 'id')->toArray();
     }
 
-    protected function getTree($page_size = 15, $parend_id = 0, &$result = [])
+    protected function getTree($page_size = 15, $parent_id = 0, &$result = [])
     {
         $model = $this->model;
         $model = new $model();
-        if ($parend_id == 0) {
-            $records = $model->where('parent_id', $parend_id)->paginate($page_size);
+        if ($parent_id == 0) {
+            $records = $model->where('parent_id', $parent_id)->paginate($page_size);
         } else {
-            $records = $model->where('parent_id', $parend_id)->get();
+            $records = $model->where('parent_id', $parent_id)->get();
         }
 
         if ($records->isNotEmpty()) {
-            foreach ($records as $key => $item) {
+            foreach ($records as $item) {
                 $result[$item['id']] = $item->toArray();
                 $this->getTree($page_size, $item['id'], $result);
             }
@@ -218,70 +218,79 @@ class Page
      * 'name|like',
      * 'name|like|jak',
      * ];
+     * @param array $params
      * @return array
      */
-
     public function search(array $params = []): array
     {
         return array_merge($this->search, $params);
     }
 
     /**
-     * restful处理完成后的回调
-     * @param $result
-     * @param $action
-     * @return mixed
+     * 处理完成后的回调
+     * @param Output $output
+     * @param string $action
+     * @return Output
      */
-
-    public function complete($result, $action)
+    public function complete(Output $output, string $action): Output
     {
-        return $result;
+        return $output;
     }
 
-    protected function validate($data = [], array $rules = [], array $message = [])
+    /**
+     * @param array $data
+     * @param array $rules
+     * @param array $message
+     * @return \Magein\Common\Output
+     */
+    protected function validate(array $data = [], array $rules = [], array $message = []): Output
     {
-        $data = $data ?: request()->only($this->fillable());
         $rules = $rules ?: $this->rules();
         $message = $message ?: $this->message();
 
         if (empty($data)) {
-            return MsgContainer::msg('发生错误', ViewErrorCode::REQUEST_DATA_IS_NULL);
+            return Output::error('发生错误', ViewErrorCode::REQUEST_DATA_IS_NULL);
         }
         if (empty($rules)) {
-            return MsgContainer::msg('数据验证规则尚未设置', ViewErrorCode::REQUEST_DATA_VALIDATE_RULES_IS_NULL);
+            return Output::error('数据验证规则尚未设置', ViewErrorCode::REQUEST_DATA_VALIDATE_RULES_IS_NULL);
         }
 
         $validator = Validator::make($data, $rules, $message);
-
         if ($validator->fails()) {
-            return MsgContainer::msg($validator->errors()->first(), ViewErrorCode::REQUEST_DATA_VALIDATE_FAIL);
+            return Output::error($validator->errors()->first(), ViewErrorCode::REQUEST_DATA_VALIDATE_FAIL);
         }
 
-        return $data;
+        return Output::success($data);
+    }
+
+    /**
+     * @return array
+     */
+    protected function transPostData(): array
+    {
+        return request()->only($this->fillable());
     }
 
     /**
      * @param array $data
      * @param array $rule
      * @param array $message
-     * @return array|MsgContainer
+     * @return \Magein\Common\Output
      */
-
-    public function create(array $data = [], array $rule = [], array $message = [])
+    public function create(array $data = [], array $rule = [], array $message = []): Output
     {
-        return $this->validate($data, $rule, $message);
+        return $this->validate($data ?: $this->transPostData(), $rule, $message);
     }
 
     /**
      * @param array $data
      * @param array $rule
      * @param array $message
-     * @return array|MsgContainer
+     * @return \Magein\Common\Output
      */
-
-    public function edit(array $data = [], array $rule = [], array $message = [])
+    public function edit(array $data = [], array $rule = [], array $message = []): Output
     {
-        return $this->validate($data, $rule, $message);
+        return $this->validate($data ?: $this->transPostData(), $rule, $message);
     }
 
     /**

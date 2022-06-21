@@ -9,7 +9,6 @@ use Magein\Admin\View\ViewData;
 use Magein\Common\ApiResponse;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Request;
-use Magein\Common\Upload\Driver\UploadLocal;
 use Magein\Upload\Facades\Upload;
 
 class System extends BaseController

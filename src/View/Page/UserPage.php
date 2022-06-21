@@ -3,9 +3,9 @@
 namespace Magein\Admin\View\Page;
 
 use Magein\Admin\Models\User;
-use Magein\Admin\Models\UserSetting;
 use Magein\Admin\Service\SystemService;
 use Magein\Admin\View\Page;
+use Magein\Common\Output;
 
 class UserPage extends Page
 {
@@ -49,9 +49,9 @@ class UserPage extends Page
         'avatar.max' => '头像最大长度为191',
     ];
 
-    public function complete($result, $action)
+    public function complete(Output $output, string $action): Output
     {
-        if ($result) {
+        if ($output) {
             if ($action == 'create' || $action == 'edit') {
                 $user_id = request()->input('id');
                 $role_id = request()->input('role_id');
@@ -59,11 +59,11 @@ class UserPage extends Page
                     SystemService::instance()->setUserRole($user_id, $role_id);
                 }
             } elseif ($action == 'get') {
-                $setting = SystemService::instance()->getUserSetting($result->id);
-                $result->role_id = $setting['role_id'] ?? [];
+                $setting = SystemService::instance()->getUserSetting($output->id);
+                $output->role_id = $setting['role_id'] ?? [];
             }
         }
 
-        return parent::complete($result, $action);
+        return parent::complete($output, $action);
     }
 }

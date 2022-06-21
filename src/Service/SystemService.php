@@ -6,10 +6,12 @@ use Magein\Admin\Models\SystemPermission;
 use Magein\Admin\Models\UserRole;
 use Magein\Admin\Models\UserSetting;
 use Magein\Common\BaseService;
-use Magein\Common\MsgContainer;
 
-class SystemService extends BaseService
+class SystemService
 {
+
+    use BaseService;
+
     /**
      * @param $user_id
      * @param bool|array $rel

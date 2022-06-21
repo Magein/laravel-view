@@ -49,15 +49,15 @@ class UserRolePage extends Page
 
     public $columns = 'name';
 
-    public function complete($result, $action)
+    public function complete($output, $action)
     {
-        if ($result) {
-            if ($action == 'get' && $result->permission_id) {
-                $result->permission = SystemPermission::whereIn('id', $result->permission_id)->get();
+        if ($output) {
+            if ($action == 'get' && $output->permission_id) {
+                $output->permission = SystemPermission::whereIn('id', $output->permission_id)->get();
             }
         }
 
-        return parent::complete($result, $action);
+        return parent::complete($output, $action);
     }
 }
 
