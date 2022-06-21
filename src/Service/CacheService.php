@@ -37,7 +37,12 @@ class CacheService
         return $paths;
     }
 
-    public function setQrcodeToken($user_id, $token)
+    /**
+     * @param $user_id
+     * @param $token
+     * @return \Magein\Common\Output
+     */
+    public function setQrcodeToken($user_id, $token): Output
     {
         if (empty($token) || empty($user_id)) {
             return new Output('参数错误');
@@ -45,6 +50,6 @@ class CacheService
 
         RedisCache::put($token, $user_id, 300);
 
-        return true;
+        return new Output(true);
     }
 }

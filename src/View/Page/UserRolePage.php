@@ -6,6 +6,7 @@ use Magein\Admin\Models\SystemPermission;
 use Magein\Admin\Models\UserRole;
 use Magein\Admin\Service\SystemService;
 use Magein\Admin\View\Page;
+use Magein\Common\Output;
 
 class UserRolePage extends Page
 {
@@ -49,14 +50,15 @@ class UserRolePage extends Page
 
     public $columns = 'name';
 
-    public function complete($output, $action)
+    public function complete(Output $output, string $action): Output
     {
-        if ($output) {
-            if ($action == 'get' && $output->permission_id) {
-                $output->permission = SystemPermission::whereIn('id', $output->permission_id)->get();
+        if ($output->getCode() == 0) {
+            $data = $output->getData();
+            if ($action == 'get' && $data->permission_id) {
+                $data->permission = SystemPermission::whereIn('id', $data->permission_id)->get();
             }
+            $output->setData($data);
         }
-
         return parent::complete($output, $action);
     }
 }

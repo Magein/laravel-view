@@ -15,6 +15,10 @@ use Illuminate\Support\Facades\Request;
  */
 class UserCenter
 {
+    /**
+     * @param \Illuminate\Support\Facades\Request $request
+     * @return ResponseFactory|Response
+     */
     public function logout(Request $request)
     {
         if ($request::user()) {

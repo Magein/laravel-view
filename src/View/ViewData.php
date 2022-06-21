@@ -304,9 +304,9 @@ class ViewData
 
     /**
      * 彻底删除
-     * @return int|Output
+     * @return Output
      */
-    protected function clean(): int
+    protected function clean(): Output
     {
         $ids = request()->input('ids');
 
@@ -335,7 +335,7 @@ class ViewData
      * 恢复数据
      * @return Output
      */
-    protected function restore()
+    protected function restore(): Output
     {
         $ids = request()->input('ids');
 

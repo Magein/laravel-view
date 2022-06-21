@@ -6,6 +6,7 @@ use Magein\Admin\Models\SystemPermission;
 use Magein\Admin\Models\UserRole;
 use Magein\Admin\Models\UserSetting;
 use Magein\Common\BaseService;
+use Magein\Common\Output;
 
 class SystemService
 {
@@ -174,7 +175,7 @@ class SystemService
     {
         $userRole = UserRole::find($role_id);
         if (empty($userRole) || empty($permission_id)) {
-            return MsgContainer::msg('参数错误');
+            return Output::error('参数错误');
         }
         $userRole->permission_id = array_diff($userRole->permission_id, $permission_id);
         $userRole->save();

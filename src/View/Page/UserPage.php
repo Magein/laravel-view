@@ -51,7 +51,7 @@ class UserPage extends Page
 
     public function complete(Output $output, string $action): Output
     {
-        if ($output) {
+        if ($output->getCode() == 0) {
             if ($action == 'create' || $action == 'edit') {
                 $user_id = request()->input('id');
                 $role_id = request()->input('role_id');
@@ -59,8 +59,8 @@ class UserPage extends Page
                     SystemService::instance()->setUserRole($user_id, $role_id);
                 }
             } elseif ($action == 'get') {
-                $setting = SystemService::instance()->getUserSetting($output->id);
-                $output->role_id = $setting['role_id'] ?? [];
+                $setting = SystemService::instance()->getUserSetting($output->getData()->id);
+                $output->getData()->role_id = $setting['role_id'] ?? [];
             }
         }
 

@@ -2178,25 +2178,20 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Magein/laravel-sms.git",
-                "reference": "def4ae4757ffcadd2d4d51a5bfacb1a963a26652"
+                "reference": "164859232a68f19f31c740eb7867dd4fd4073bd4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Magein/laravel-sms/zipball/def4ae4757ffcadd2d4d51a5bfacb1a963a26652",
-                "reference": "def4ae4757ffcadd2d4d51a5bfacb1a963a26652",
-                "shasum": "",
-                "mirrors": [
-                    {
-                        "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
-                        "preferred": true
-                    }
-                ]
+                "url": "https://api.github.com/repos/Magein/laravel-sms/zipball/164859232a68f19f31c740eb7867dd4fd4073bd4",
+                "reference": "164859232a68f19f31c740eb7867dd4fd4073bd4",
+                "shasum": ""
             },
             "require": {
-                "alibabacloud/darabonba-openapi": "^0.2.5",
+                "alibabacloud/darabonba-openapi": "~0.2.5",
                 "alibabacloud/dysmsapi-20170525": "2.0.9",
                 "ext-json": "*",
                 "laravel/framework": "~8.54",
+                "magein/tools": "*@dev",
                 "php": "^7.4|^8.0"
             },
             "default-branch": true,
@@ -2216,17 +2211,17 @@
                     "email": "1154699897@qq.com"
                 }
             ],
-            "description": "laravel框架集成的短信功能",
+            "description": "laravel框架扩展的短信功能",
             "homepage": "https://github.com/magein/laravel-sms",
             "keywords": [
                 "laravel",
-                "tools"
+                "sms"
             ],
             "support": {
                 "issues": "https://github.com/Magein/laravel-sms/issues",
                 "source": "https://github.com/Magein/laravel-sms/tree/master"
             },
-            "time": "2022-03-07T05:20:20+00:00"
+            "time": "2022-06-21T06:24:55+00:00"
         },
         {
             "name": "magein/laravel-upload",

@@ -23,21 +23,25 @@ class UserService
     }
 
     /**
-     * @return Authenticatable|null
+     * @return \Magein\Common\Output
      */
-    public function getInfo()
+    public function getInfo(): Output
     {
         $user = request()->user();
         if ($user) {
             $user['setting'] = SystemService::instance()->getUserSetting($user->id ?? '');
         }
-        return $user;
+        return new Output($user);
     }
 
-    public function setUserInfo($data)
+    /**
+     * @param $data
+     * @return \Magein\Common\Output
+     */
+    public function setUserInfo($data): Output
     {
         if (!self::id()) {
-            return new Output('请先登录', 403);
+            return Output::error('请先登录', 403);
         }
         $userPage = new UserPage();
         $validate = Validator::make($data, $userPage->rules, $userPage->message);
@@ -47,10 +51,20 @@ class UserService
 
         $user = User::find(self::id());
         $user->fill($data);
-        return $user->save();
+        $result = $user->save();
+        if ($result) {
+            return new Output(true);
+        }
+        return new Output('修改密码失败');
     }
 
-    public function setPassword($password, $new, $confirm)
+    /**
+     * @param $password
+     * @param $new
+     * @param $confirm
+     * @return \Magein\Common\Output
+     */
+    public function setPassword($password, $new, $confirm): Output
     {
         if (empty($password)) {
             return new Output('请输入密码');
@@ -60,7 +74,7 @@ class UserService
             return new Output('请输入新密码');
         }
 
-        if (!preg_match('/[\w]{6,18}/', $new)) {
+        if (!preg_match('/^\w{6,18}$/', $new)) {
             return new Output('密码仅允许数字、字母、下划线且长度为6~18个字符');
         }
 
@@ -74,10 +88,18 @@ class UserService
         }
         $user->password = $new;
         $user->pass_updated_at = now();
-        return $user->save();
+        $result = $user->save();
+        if ($result) {
+            return new Output(true);
+        }
+        return new Output('修改密码失败');
     }
 
-    private function loginAfter($user)
+    /**
+     * @param $user
+     * @return \Magein\Common\Output
+     */
+    private function loginAfter($user): Output
     {
         if ($user->status == 0) {
             return new Output('用户已经被禁止登录');
@@ -95,7 +117,12 @@ class UserService
         ]);
     }
 
-    public function login($email, $password)
+    /**
+     * @param $email
+     * @param $password
+     * @return \Magein\Common\Output
+     */
+    public function login($email, $password): Output
     {
         $user = User::_email($email);
 
@@ -106,8 +133,12 @@ class UserService
         return $this->loginAfter($user);
     }
 
-
-    public function loginByPhone($phone, $code)
+    /**
+     * @param $phone
+     * @param $code
+     * @return \Magein\Common\Output
+     */
+    public function loginByPhone($phone, $code): Output
     {
         $user = User::_phone($phone);
 
@@ -115,14 +146,18 @@ class UserService
             return new Output('用户不存在');
         }
 
-        if (Sms::validate($phone, $code, SmsCode::SCENE_LOGIN)->fail()) {
+        if (Sms::validate($phone, $code, SmsCode::SCENE_VERIFY_PHONE)->fail()) {
             return new Output('验证码不正确');
         }
 
         return $this->loginAfter($user);
     }
 
-    public function loginByQrcode($token)
+    /**
+     * @param $token
+     * @return \Magein\Common\Output
+     */
+    public function loginByQrcode($token): Output
     {
         $user_id = RedisCache::get($token);
         if (empty($user_id)) {
